@@ -1,0 +1,152 @@
+/* .footer{
+  background-color: #212121;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    /* position: fixed;
+    bottom: 0; 
+    width: 100%;
+} */
+.siteFooter {
+  /* background-color: #212121; */
+  padding: 45px 0 20px;
+  font-size: 15px;
+  line-height: 24px;
+  color: #737373;
+  width: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.colSm12ColMd6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+  padding: 0 15px;
+}
+
+.colXs6ColMd3 {
+  flex: 0 0 25%;
+  max-width: 25%;
+  padding: 0 15px;
+}
+
+.colMd8ColSm6ColXs12 {
+  flex: 0 0 66.666667%;
+  max-width: 66.666667%;
+  padding: 0 15px;
+}
+
+.colMd4ColSm6ColXs12 {
+  flex: 0 0 33.333333%;
+  max-width: 33.333333%;
+  padding: 0 15px;
+}
+
+.siteFooter h6 {
+  color: #fff;
+  font-size: 16px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  letter-spacing: 2px;
+}
+
+.siteFooter a {
+  color: #737373;
+}
+
+.siteFooter a:hover {
+  color: #F8FF24; /* Using your accent color */
+  text-decoration: none;
+}
+
+.footerLinks {
+  padding-left: 0;
+  list-style: none;
+}
+
+.footerLinks li {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.footerLinks a {
+  color: #bbb;
+}
+
+.footerLinks a:hover {
+  color: #F8FF24;
+}
+
+.socialIcons {
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.socialIcons li {
+  margin-left: 10px;
+}
+
+.socialIcons a {
+  background-color: #33353d;
+  color: #fff;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 100%;
+  transition: all 0.2s linear;
+}
+
+.socialIcons a:hover {
+  color: #fff;
+  background-color: #F8FF24;
+}
+
+.copyrightText {
+  margin: 0;
+}
+
+hr {
+  border-top-color: #bbb;
+  opacity: 0.5;
+  margin: 20px 0;
+}
+
+/* Responsive styles */
+@media (max-width: 991px) {
+  .colSm12ColMd6,
+  .colXs6ColMd3 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 767px) {
+  .colMd8ColSm6ColXs12,
+  .colMd4ColSm6ColXs12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+  
+  .socialIcons {
+    justify-content: center;
+  }
+}

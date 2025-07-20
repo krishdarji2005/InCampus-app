@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background-color: #000;
+  overflow-x: hidden;
+}
+
+/* Remove the conflicting styles that were overriding your components */
+.home-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.home {
+  position: relative; /* Changed from absolute */
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Z-index hierarchy clarification */
+/* Background: z-index 0 */
+/* Content: z-index 2 */
+/* Navbar: z-index 1000 */

@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.hero {
+  overflow: hidden;
+  margin: 0 auto;
+  padding-top: 2rem; /* Add padding to account for fixed navbar */
+  position: relative;
+  z-index: 2; 
+  min-height: 100vh;
+
+}
+
+.heroContainer {
+  margin: 0 auto;
+  max-width: 1200px;
+  z-index: 2;
+  position: relative;
+  min-height: auto;
+
+}
+
+.heroContent {
+  display: flex;
+  /*flex-direction: column; /Change to row for side-by-side layout */
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeInUp 0.8s ease-out forwards;
+  gap: 3rem;
+  padding: 2rem 1rem;
+}
+
+.contentLeft {
+  flex: 1;
+  text-align: left; /* Change to left align for better layout */
+  /* max-width: 600px; */
+}
+
+.contentRight {
+  flex: 1;
+  max-width: 600px;
+  /* margin-left: 20px; */
+  
+}
+
+.title {
+  font-size: 4rem;
+  line-height: 1.1;
+  font-weight: 600;
+  color: white;
+  /* margin-bottom: 1rem; */
+}
+
+.title span {
+  font-family: "Playfair Display", serif;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: italic;
+  background: #F8FF24;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.description {
+  display: block;
+  color: rgba(196, 195, 195, 0.95);
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  font-size: 1.25rem;
+  max-width: 750px;
+  line-height: 1.6;
+}
+
+.button a{
+  display: flex;
+margin: 2rem auto;
+justify-content: flex-start;
+align-items: center;
+padding-left: 2rem;
+}
+  
+
+
+.isometricImage {
+  width: 100%;
+  height: auto;
+  max-height: 600px; /* Increased from previous suggestion */
+  object-fit: contain;
+  transform: scale(1.3); 
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .heroContent {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .contentLeft {
+    text-align: center;
+  }
+  
+  .title {
+    font-size: 3rem;
+  }
+  
+  .description {
+    max-width: 100%;
+  }
+}
