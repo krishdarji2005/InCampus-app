@@ -4,9 +4,10 @@
   left: 0;
   width: 100%;
   z-index: 1000;
-  border-bottom: 0.01px solid rgb(119, 119, 119);
-  background-color: #00000042;
-  
+  border-bottom: 0.01px solid rgba(119, 119, 119, 0.174);
+  background-color: #21212142;
+   -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 /*#893ACF*/
@@ -16,7 +17,7 @@
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.5rem;
+  padding: 0.5rem; 
 
 }
 
@@ -54,6 +55,8 @@
   display: flex;
   gap: 24px;
   list-style: none;
+  justify-content: center;
+  align-items: center;
 }
 
 .navLinks li a {
@@ -74,5 +77,12 @@
   background-color: rgba(128, 126, 126, 0.282);
   border: 1px solid rgb(128, 126, 126);
   border-radius: 9px;
+  color: lightgray;
 
+
+}
+.signIn:hover {
+  color: white;
+  font-weight: 200;
+  cursor: pointer;
 }

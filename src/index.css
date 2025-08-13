@@ -18,6 +18,7 @@ body {
   position: relative;
   width: 100%;
   min-height: 100vh;
+  margin: 0 auto;
 }
 
 .home {
@@ -30,3 +31,19 @@ body {
 /* Background: z-index 0 */
 /* Content: z-index 2 */
 /* Navbar: z-index 1000 */
+
+[auth-trigger]:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Navbar items */
+.navLinks li span {
+  color: lightgray;
+  cursor: pointer;
+}
+.navLinks li span:hover {
+  color: white;
+}
+

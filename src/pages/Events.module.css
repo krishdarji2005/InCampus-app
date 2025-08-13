@@ -1,0 +1,68 @@
+/* Events.module.css */
+.eventsContainer {
+ width: 100%;
+  min-height: 100vh; /* Changed from height to min-height */
+  background:#0C0A09;
+  margin-top: 3rem;
+  color: white;
+  padding-bottom: 3rem; /* Add bottom padding */
+
+
+
+
+  
+}
+
+.eventsContent {
+  max-width: 1200px;
+  /* background-color: aliceblue; */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  /* align-items: center; */
+  margin: 0 auto;
+  padding-top: 2rem; /* Added for spacing */
+  color: rgb(255, 255, 255); /* Text color for content area */
+
+
+}
+
+.eventsTextContent {
+  text-align: left; /* Center align the text */
+  margin-bottom: 2rem; /* Space below text */
+}
+
+.eventsTitle {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.eventsDescription {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: rgb(221, 221, 221);
+}
+
+.eventsCardsContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+  margin-top: 1rem;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .eventsCardsContent {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .eventsCardsContent {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}

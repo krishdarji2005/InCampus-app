@@ -12,11 +12,15 @@
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
     "framer-motion": "^12.23.6",
+    "lightswind": "^3.1.12",
+    "motion": "^12.23.12",
     "ogl": "^1.0.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.6.3",
+    "react-lazy-load-image-component": "^1.6.3",
+    "react-router-dom": "^7.7.1",
+    "react-window": "^1.8.11",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {

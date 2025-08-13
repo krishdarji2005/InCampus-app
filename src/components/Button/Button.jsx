@@ -5,7 +5,12 @@ const Button = ({
   initialText = "Get Started", 
   hoverText = "Go Now",
   width = 220,
-  height = 80 
+  height = 80,
+  isLoading = false,
+  isError = false,
+  protectedRoute = false,
+  onProtectedClick,
+  ...rest
 }) => {
   // Split text into individual characters for animation
   const renderText = (text, stateClass, startIndex = 1) => {
@@ -32,9 +37,16 @@ const Button = ({
     return basePosition + offset;
   };
 
+  if (isLoading) return <StyledWrapper width={width} height={height}><button className="button">Loading...</button></StyledWrapper>;
+  if (isError) return <StyledWrapper width={width} height={height}><button className="button">Error</button></StyledWrapper>;
+
   return (
     <StyledWrapper width={width} height={height} hoverTextLeft={getHoverTextPosition()}>
-      <button className="button">
+      <button
+        className="button"
+        onClick={protectedRoute ? onProtectedClick : rest.onClick}
+        {...rest}
+      >
         <div className="bg" />
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height={208} width={342} className="splash">
           <path d="M205.013 51.6776C205.013 51.6776 222.054 61.2946 235.29 59.6279C248.526 57.9612 258.143 47.3443 271.379 45.6776C284.615 44.0109 297.851 47.3443 311.087 45.6776" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
@@ -94,6 +106,7 @@ const StyledWrapper = styled.div`
     /* Prevent any background bleeding */
     isolation: isolate;
     margin-top:2rem;
+    margin-left:2rem;
   }
 
   /* Fix for the background bleeding issue */
