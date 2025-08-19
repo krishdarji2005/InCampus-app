@@ -83,7 +83,8 @@
     0 4px 20px rgba(0, 0, 0, 0.1),
     inset 0 0 12px rgba(255, 255, 255, 0.1);
   transition: all 0.4s ease;
-  
+ 
+
 }
 
 .rotatingText::before {

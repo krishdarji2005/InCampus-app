@@ -3,7 +3,7 @@ import { MdArrowOutward } from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import styles from "./Navbar.module.css";
 import InCampusFinalLogoo from "../assets/InCampusFinalLogoo.svg";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth0, User } from "@auth0/auth0-react";
 
 
 
@@ -44,6 +44,8 @@ const Navbar = () => {
                 <button className={styles.signIn} onClick={() => loginWithRedirect()}>Sign In</button>
               ) : (
                 <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+                  {/* {console.log(user)} */}
+                  
                   <img src={user?.picture} alt="profile" style={{width:32,height:32,borderRadius:'50%'}} />
                   <span style={{color:'white',fontWeight:300}}>{user?.name}</span>
                   <button className={styles.signIn} onClick={() => logout({ returnTo: window.location.origin })}>Sign Out</button>

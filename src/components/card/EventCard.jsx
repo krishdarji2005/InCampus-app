@@ -3,10 +3,15 @@ import styles from "./EventCard.module.css";
 import CardImage from "../../assets/japaneasy2001.jpg";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
+import { useNavigate } from "react-router-dom";
 
 const EventCard = React.memo(function EventCard({ event }) {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate(`/events/${event.id}`, { state: { event } });
+  };
   return (
-    <article className={styles.card}>
+    <article className={styles.card} onClick={handleClick} role="button" tabIndex={0}>
       <div className={styles.imageWrapper}>
         <LazyLoadImage
           src={event.image}

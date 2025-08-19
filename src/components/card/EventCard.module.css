@@ -4,19 +4,22 @@
   padding: 12px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.096);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
   max-width: 380px;
+
   /* Reduced from original */
   color: white;
   cursor: pointer;
   will-change: transform;
+  backdrop-filter: blur(4px);
 }
 
 .card:hover {
   /* background: rgba(255, 255, 255, 0.1); */
   transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 6px 24px 0 rgba(122, 124, 239, 0.15);
+  box-shadow: 0 6px 24px 0 rgba(154, 153, 155, 0.15);
 }
 
 .imageWrapper {
@@ -107,5 +110,11 @@
 
   .title {
     font-size: 14px;
+  }
+}
+@media (max-width: 480px) {
+  .card {
+    max-width: none; /* Allow full width on mobile */
+    padding: 16px; /* Slightly larger padding */
   }
 }

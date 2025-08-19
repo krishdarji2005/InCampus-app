@@ -48,10 +48,7 @@ const Button = ({
         {...rest}
       >
         <div className="bg" />
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 342 208" height={208} width={342} className="splash">
-          <path d="M205.013 51.6776C205.013 51.6776 222.054 61.2946 235.29 59.6279C248.526 57.9612 258.143 47.3443 271.379 45.6776C284.615 44.0109 297.851 47.3443 311.087 45.6776" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-          <path d="M17.6776 51.6776C17.6776 51.6776 34.7186 61.2946 47.9546 59.6279C61.1906 57.9612 70.8076 47.3443 84.0436 45.6776C97.2796 44.0109 110.516 47.3443 123.752 45.6776" stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
-        </svg>
+      
         <div className="wrap">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 221 42" height={42} width={221} className="path">
             <path strokeLinecap="round" strokeWidth={3} d="M182.674 2H203C211.837 2 219 9.16344 219 18V24C219 32.8366 211.837 40 203 40H18C9.16345 40 2 32.8366 2 24V18C2 9.16344 9.16344 2 18 2H47.8855" />
@@ -332,16 +329,7 @@ const StyledWrapper = styled.div`
     pointer-events: none;
   }
 
-  .splash {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    stroke-dasharray: 60 60;
-    stroke-dashoffset: 60;
-    transform: translate(-17%, -31%);
-    stroke: var(--purple-300);
-  }
+
 
   /** HOVER STATES */
   .button:hover .char.state-1 span::before {
@@ -392,9 +380,7 @@ const StyledWrapper = styled.div`
     transform: translate(3px, -3px);
   }
 
-  .button:active .splash {
-    animation: splash 0.8s cubic-bezier(0.3, 0, 0, 1) forwards 0.05s;
-  }
+ 
 
   /** FOCUS STATES */
   .button:focus .path {
@@ -496,12 +482,7 @@ const StyledWrapper = styled.div`
     }
   }
 
-  @keyframes splash {
-    to {
-      stroke-dasharray: 2 60;
-      stroke-dashoffset: -60;
-    }
-  }
+
 `;
 
 export default Button;

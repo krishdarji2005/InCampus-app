@@ -6,9 +6,9 @@
   margin-top: 3rem;
   color: white;
   padding-bottom: 3rem; /* Add bottom padding */
-
-
-
+  
+  background: url("../assets/darkbg.png");
+  background-repeat: repeat-y;
 
   
 }
@@ -35,34 +35,37 @@
 .eventsTitle {
   font-size: 2rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
+  padding: 1rem;
+
 }
 
 .eventsDescription {
   font-size: 1.1rem;
   line-height: 1.5;
   color: rgb(221, 221, 221);
+  padding-left: 1rem;
 }
 
 .eventsCardsContent {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
-  padding: 1rem 0;
-  margin-top: 1rem;
+  padding: 1rem;
   width: 100%;
+  justify-items: center; /* Centers cards in their grid cells */
 }
 @media (max-width: 768px) {
   .eventsCardsContent {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
-    padding: 0.5rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
   }
 }
 
 @media (max-width: 480px) {
   .eventsCardsContent {
     grid-template-columns: 1fr;
-    gap: 1.25rem;
+    gap: 1rem;
+    padding: 0.5rem;
   }
 }
