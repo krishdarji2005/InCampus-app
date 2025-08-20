@@ -1,7 +1,8 @@
 import React from "react";
 import HeroSection from "../components/HeroSection";
+import BentoWTxt from "../components/BentoWTxt";
 import DarkVeil from "../background/DarkVeil/DarkVeil";
-import styles from "./Home.module.css"; // Create this file
+import styles from "./Home.module.css";
 
 const Home = () => {
   return (
@@ -11,6 +12,7 @@ const Home = () => {
       </div>
       <div className={styles.contentLayer}>
         <HeroSection />
+        <BentoWTxt />
       </div>
     </div>
   );

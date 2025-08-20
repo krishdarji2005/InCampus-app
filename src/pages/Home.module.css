@@ -6,19 +6,25 @@
 }
 
 .backgroundLayer {
-  position: absolute; /* Changed from absolute to fixed */
+  position: absolute;
+  /* Changed from absolute to fixed */ 
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0; /* Lower z-index for background */
+  z-index: 0;
+  /* Lower z-index for background */
 
 }
 
 .contentLayer {
   position: relative;
-  z-index: 2; /* Above background, below navbar */
+  z-index: 2;
+  /* Above background, below navbar */
   min-height: 100vh;
   display: flex;
   align-items: center;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
