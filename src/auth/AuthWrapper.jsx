@@ -1,8 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import Loader from '../components/Loader/Loader';
 
 // Visual feedback components
-const Loading = () => <div style={{textAlign:'center',marginTop:'2rem'}}>Loading authentication...</div>;
+const Loading = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '2rem' }}>
+    <span>Loading authentication...</span>
+    <Loader />
+  </div>
+);
 const Error = ({ error }) => <div style={{color:'red',textAlign:'center',marginTop:'2rem'}}>Auth Error: {error.message || error.toString()}</div>;
 
 // Only allow @somaiya.edu emails

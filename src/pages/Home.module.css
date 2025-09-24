@@ -15,6 +15,12 @@
   z-index: 0;
   /* Lower z-index for background */
 
+        /* background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%), #000000 ; */
+       /* background: radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%); */
+        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), #000000;
+        
+
+ 
 }
 
 .contentLayer {

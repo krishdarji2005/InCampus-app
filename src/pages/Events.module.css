@@ -1,16 +1,18 @@
 /* Events.module.css */
 .eventsContainer {
- width: 100%;
-  min-height: 100vh; /* Changed from height to min-height */
-  background:#0C0A09;
+  width: 100%;
+  min-height: 100vh;
+  /* Changed from height to min-height */
+  background: #0C0A09;
   margin-top: 3rem;
   color: white;
-  padding-bottom: 3rem; /* Add bottom padding */
-  
+  padding-bottom: 3rem;
+  /* Add bottom padding */
+
   background: url("../assets/darkbg.png");
   background-repeat: repeat-y;
 
-  
+
 }
 
 .eventsContent {
@@ -21,15 +23,19 @@
   justify-content: flex-start;
   /* align-items: center; */
   margin: 0 auto;
-  padding-top: 2rem; /* Added for spacing */
-  color: rgb(255, 255, 255); /* Text color for content area */
+  padding-top: 2rem;
+  /* Added for spacing */
+  color: rgb(255, 255, 255);
+  /* Text color for content area */
 
 
 }
 
 .eventsTextContent {
-  text-align: left; /* Center align the text */
-  margin-bottom: 2rem; /* Space below text */
+  text-align: left;
+  /* Center align the text */
+  margin-bottom: 2rem;
+  /* Space below text */
 }
 
 .eventsTitle {
@@ -45,6 +51,93 @@
   line-height: 1.5;
   color: rgb(221, 221, 221);
   padding-left: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eventsStats {
+  padding-left: 1rem;
+}
+
+.eventsCount {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: inline-block;
+}
+
+.viewControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.viewButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.viewButton:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.viewButton.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .eventsCardsContent {
@@ -53,12 +146,66 @@
   gap: 1.5rem;
   padding: 1rem;
   width: 100%;
-  justify-items: center; /* Centers cards in their grid cells */
+  justify-items: center;
+  /* Centers cards in their grid cells */
 }
+
 @media (max-width: 768px) {
   .eventsCardsContent {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.25rem;
+  }
+}
+
+.noResults {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.noResults h3 {
+  color: white;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.noResults p {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.clearFiltersButton {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.clearFiltersButton:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .viewControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewToggle {
+    justify-content: center;
+  }
+
+  .actionButtons {
+    justify-content: center;
   }
 }
 
@@ -67,5 +214,24 @@
     grid-template-columns: 1fr;
     gap: 1rem;
     padding: 0.5rem;
+  }
+
+  .noResults {
+    padding: 2rem 1rem;
+  }
+
+  .noResults h3 {
+    font-size: 1.25rem;
+  }
+
+  .viewButton {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .actionButton {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
 }

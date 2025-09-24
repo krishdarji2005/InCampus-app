@@ -1,216 +1,38 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import styles from "./Events.module.css";
 import EventCard from "../components/card/EventCard";
-import { FixedSizeGrid as Grid } from "react-window";
-// import { GridBackground } from "../background/GridBackground/GridBackground";
-const CARD_WIDTH = 380; // px, matches .card max-width
-const CARD_HEIGHT = 110; // px, estimated height
-const GUTTER = 24; // px, matches grid gap
-
+import SearchRow from "../components/SearchRow/SearchRow";
+import CompactSearchBar from "../components/CompactSearchBar/CompactSearchBar";
+import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
+import BackToTop from "../components/BackToTop/BackToTop";
+import CalendarView from "../components/CalendarView/CalendarView";
+import NotificationPreferences from "../components/NotificationPreferences/NotificationPreferences";
+import EventFeedback from "../components/EventFeedback/EventFeedback";
+import EventCardSkeleton from "../components/LoadingSkeleton/EventCardSkeleton";
+import { events as allEvents } from "../data/events";
+import { IoIosNotifications } from "react-icons/io";
+import { RiFeedbackLine } from "react-icons/ri";
+import { ImCalendar } from "react-icons/im";
+import { BsFillGrid3X3GapFill } from "react-icons/bs";
 const Events = () => {
-  const events = [
-    {
-      id: 1,
-      image:
-        "https://images.unsplash.com/photo-1612831666989-bc3e0463a6ec?w=400&q=60",
-      date: "Mar 12, 2024",
-      readTime: "5 min",
-      title:
-        "Powerful Ads, Bigger Results: Elevate Your Brand in a Single Line!",
-      author: "John Smith",
-      authorImage: "https://i.pravatar.cc/24?img=8",
-    },
-    {
-      id: 2,
-      image:
-        "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&q=60",
-      date: "Mar 15, 2024",
-      readTime: "10 min",
-      title: "Tech Symposium: Future of AI in Education",
-      author: "Sarah Johnson",
-      authorImage: "https://i.pravatar.cc/24?img=11",
-    },
-    {
-      id: 3,
-      image:
-        "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&q=60",
-      date: "Mar 18, 2024",
-      readTime: "7 min",
-      title: "Creative Writing Workshop for Beginners",
-      author: "Michael Chen",
-      authorImage: "https://i.pravatar.cc/24?img=3",
-    },
-    {
-      id: 4,
-      image:
-        "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&q=60",
-      date: "Mar 21, 2024",
-      readTime: "6 min",
-      title: "How to Build a Personal Brand Online",
-      author: "Emily Davis",
-      authorImage: "https://i.pravatar.cc/24?img=5",
-    },
-    {
-      id: 5,
-      image:
-        "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=400&q=60",
-      date: "Mar 24, 2024",
-      readTime: "8 min",
-      title: "Sustainable Innovation: A Green Tech Panel Discussion",
-      author: "David Lee",
-      authorImage: "https://i.pravatar.cc/24?img=6",
-    },
-    {
-      id: 6,
-      image:
-        "https://images.unsplash.com/photo-1556740749-887f6717d7e4?w=400&q=60",
-      date: "Mar 27, 2024",
-      readTime: "5 min",
-      title: "Freelancing 101: Start Earning on Your Own Terms",
-      author: "Anna White",
-      authorImage: "https://i.pravatar.cc/24?img=7",
-    },
-    {
-      id: 7,
-      image:
-        "https://images.unsplash.com/photo-1559027615-9d9d798b1e31?w=400&q=60",
-      date: "Mar 30, 2024",
-      readTime: "9 min",
-      title: "UI/UX Meetup: Designing for the Next Billion Users",
-      author: "Carlos Mendes",
-      authorImage: "https://i.pravatar.cc/24?img=9",
-    },
-    {
-      id: 8,
-      image:
-        "https://images.unsplash.com/photo-1581091012184-e9d9e1ff0f85?w=400&q=60",
-      date: "Apr 2, 2024",
-      readTime: "4 min",
-      title: "Startup Pitch Night: Battle of Ideas",
-      author: "Riya Kapoor",
-      authorImage: "https://i.pravatar.cc/24?img=10",
-    },
-    {
-      id: 9,
-      image:
-        "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=400&q=60",
-      date: "Apr 5, 2024",
-      readTime: "6 min",
-      title: "Campus Coding Jam: 24-Hour Hackathon Recap",
-      author: "Mohit Singh",
-      authorImage: "https://i.pravatar.cc/24?img=12",
-    },
-    {
-      id: 10,
-      image:
-        "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&q=60",
-      date: "Apr 7, 2024",
-      readTime: "7 min",
-      title: "Design Thinking Bootcamp: What We Learned",
-      author: "Lara Brown",
-      authorImage: "https://i.pravatar.cc/24?img=13",
-    },
-    {
-      id: 11,
-      image:
-        "https://images.unsplash.com/photo-1485217988980-11786ced9454?w=400&q=60",
-      date: "Apr 10, 2024",
-      readTime: "3 min",
-      title: "Photography Walk: Capturing Campus Life",
-      author: "Tanmay Rao",
-      authorImage: "https://i.pravatar.cc/24?img=14",
-    },
-    {
-      id: 12,
-      image:
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&q=60",
-      date: "Apr 12, 2024",
-      readTime: "5 min",
-      title: "Cybersecurity 101: Staying Safe Online",
-      author: "Aisha Malik",
-      authorImage: "https://i.pravatar.cc/24?img=15",
-    },
-    {
-      id: 13,
-      image:
-        "https://images.unsplash.com/photo-1573164713347-df1e93c4f943?w=400&q=60",
-      date: "Apr 15, 2024",
-      readTime: "8 min",
-      title: "Women in Tech: Voices from the Frontline",
-      author: "Priya Desai",
-      authorImage: "https://i.pravatar.cc/24?img=16",
-    },
-    {
-      id: 14,
-      image:
-        "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=400&q=60",
-      date: "Apr 18, 2024",
-      readTime: "6 min",
-      title: "Game Development Night: Student Projects Showcase",
-      author: "Ethan Clark",
-      authorImage: "https://i.pravatar.cc/24?img=17",
-    },
-    {
-      id: 15,
-      image:
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&q=60",
-      date: "Apr 20, 2024",
-      readTime: "4 min",
-      title: "Music & Coding: A Fusion Workshop",
-      author: "Sneha Iyer",
-      authorImage: "https://i.pravatar.cc/24?img=18",
-    },
-    {
-      id: 16,
-      image:
-        "https://images.unsplash.com/photo-1513569771920-bf57b838eced?w=400&q=60",
-      date: "Apr 23, 2024",
-      readTime: "10 min",
-      title: "Startup Funding Secrets: Fireside Chat with Investors",
-      author: "Arjun Mehta",
-      authorImage: "https://i.pravatar.cc/24?img=19",
-    },
-    {
-      id: 17,
-      image:
-        "https://images.unsplash.com/photo-1504384764586-bb4cdc1707b0?w=400&q=60",
-      date: "Apr 25, 2024",
-      readTime: "5 min",
-      title: "Chess + AI: Intelligent Strategies Explained",
-      author: "Neha Verma",
-      authorImage: "https://i.pravatar.cc/24?img=20",
-    },
-    {
-      id: 18,
-      image:
-        "https://images.unsplash.com/photo-1603570412205-8b7421c5cdff?w=400&q=60",
-      date: "Apr 28, 2024",
-      readTime: "9 min",
-      title: "Robotics Fair 2024: Highlights & Innovations",
-      author: "Kunal Patil",
-      authorImage: "https://i.pravatar.cc/24?img=21",
-    },
-    {
-      id: 19,
-      image:
-        "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&q=60",
-      date: "May 1, 2024",
-      readTime: "7 min",
-      title: "From Idea to App: Student Startup Journeys",
-      author: "Aarav Bansal",
-      authorImage: "https://i.pravatar.cc/24?img=22",
-    },
-    {
-      id: 20,
-      image:
-        "https://images.unsplash.com/photo-1596079890741-8d3d0bb09d47?w=400&q=60",
-      date: "May 4, 2024",
-      readTime: "6 min",
-      title: "TEDxYouth: Empowering Stories from Young Innovators",
-      author: "Meera Joshi",
-      authorImage: "https://i.pravatar.cc/24?img=23",
-    },
-  ];
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [filters, setFilters] = useState({
+    category: 'All',
+    format: 'All',
+    price: 'All',
+    department: 'All',
+    timeSlot: 'All',
+    dateRange: { start: '', end: '' }
+  });
+  const [sortBy, setSortBy] = useState('date-asc');
+  const [viewMode, setViewMode] = useState('grid'); // grid or calendar
+  const [bookmarkedEvents, setBookmarkedEvents] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [selectedEventForFeedback, setSelectedEventForFeedback] = useState(null);
+  const events = allEvents;
 
   // Responsive columns
   const getColumnCount = () => {
@@ -246,24 +68,230 @@ const Events = () => {
       </div>
     );
   };
+  // Filtering and sorting logic
+  const filteredAndSortedEvents = useMemo(() => {
+    let filtered = events.filter(event => {
+      // Search filter
+      if (search && !event.title.toLowerCase().includes(search.toLowerCase()) &&
+          !event.description?.toLowerCase().includes(search.toLowerCase()) &&
+          !event.tags?.some(tag => tag.toLowerCase().includes(search.toLowerCase()))) {
+        return false;
+      }
+
+      // Category filter
+      if (filters.category !== 'All' && event.category !== filters.category) {
+        return false;
+      }
+
+      // Format filter
+      if (filters.format !== 'All' && event.format !== filters.format) {
+        return false;
+      }
+
+      // Price filter
+      if (filters.price !== 'All') {
+        if (filters.price === 'Free' && event.price !== 'Free') {
+          return false;
+        }
+        if (filters.price === 'Paid' && event.price === 'Free') {
+          return false;
+        }
+      }
+
+      // Department filter
+      if (filters.department !== 'All' && event.department !== filters.department) {
+        return false;
+      }
+
+      // Time slot filter
+      if (filters.timeSlot !== 'All') {
+        const eventTime = event.time;
+        const hour = parseInt(eventTime.split(':')[0]);
+        const period = eventTime.split(' ')[1];
+        const hour24 = period === 'PM' && hour !== 12 ? hour + 12 : (period === 'AM' && hour === 12 ? 0 : hour);
+        
+        if (filters.timeSlot === 'Morning (6AM-12PM)' && (hour24 < 6 || hour24 >= 12)) {
+          return false;
+        }
+        if (filters.timeSlot === 'Afternoon (12PM-6PM)' && (hour24 < 12 || hour24 >= 18)) {
+          return false;
+        }
+        if (filters.timeSlot === 'Evening (6PM-12AM)' && (hour24 < 18 || hour24 >= 24)) {
+          return false;
+        }
+      }
+
+      // Date range filter
+      if (filters.dateRange.start || filters.dateRange.end) {
+        const eventDate = new Date(event.date);
+        if (filters.dateRange.start && eventDate < new Date(filters.dateRange.start)) {
+          return false;
+        }
+        if (filters.dateRange.end && eventDate > new Date(filters.dateRange.end)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    // Sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'date-asc':
+          return new Date(a.date) - new Date(b.date);
+        case 'date-desc':
+          return new Date(b.date) - new Date(a.date);
+        case 'popularity':
+          return (b.registrationCount || 0) - (a.registrationCount || 0);
+        case 'alphabetical':
+          return a.title.localeCompare(b.title);
+        case 'recent':
+          return b.id - a.id; // Assuming higher ID means more recent
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [events, search, filters, sortBy]);
+
+  const handleClearFilters = () => {
+    setFilters({
+      category: 'All',
+      format: 'All',
+      price: 'All',
+      department: 'All',
+      timeSlot: 'All',
+      dateRange: { start: '', end: '' }
+    });
+    setSearch('');
+  };
+
+  const handleEventClick = (event) => {
+    // Navigate to event details
+    window.location.href = `/events/${event.id}`;
+  };
+
+  const handleFeedbackClick = (event) => {
+    setSelectedEventForFeedback(event);
+    setShowFeedback(true);
+  };
 
   return (
-    <div className={styles.eventsContainer}>
-      <div className={styles.eventsContent}>
-        <div className={styles.eventsTextContent}>
-          <h2 className={styles.eventsTitle}>Discover Campus Events</h2>
-          <p className={styles.eventsDescription}>
-            Explore all upcoming campus events in one place, posted directly by
-            your college committees.
-          </p>
-        </div>
-        <div className={styles.eventsCardsContent}>
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
+    <>
+      <div className={styles.eventsContainer}>
+        <div className={styles.eventsContent}>
+          <Breadcrumb />
+          
+          <div className={styles.eventsTextContent}>
+            <h2 className={styles.eventsTitle}>Discover Campus Events</h2>
+            <p className={styles.eventsDescription}>
+              Explore all upcoming campus events in one place, posted directly by
+              your college committees.
+            </p>
+            <div className={styles.eventsStats}>
+              <span className={styles.eventsCount}>
+                {filteredAndSortedEvents.length} events found
+              </span>
+            </div>
+          </div>
+
+          <SearchRow
+            search={search}
+            setSearch={setSearch}
+            filter={filter}
+            setFilter={setFilter}
+          />
+
+          <CompactSearchBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            onClearFilters={handleClearFilters}
+          />
+
+          <div className={styles.viewControls}>
+            <div className={styles.viewToggle}>
+              <button
+                className={`${styles.viewButton} ${viewMode === 'grid' ? styles.active : ''}`}
+                onClick={() => setViewMode('grid')}
+              >
+                <BsFillGrid3X3GapFill /> Grid View
+              </button>
+              <button
+                className={`${styles.viewButton} ${viewMode === 'calendar' ? styles.active : ''}`}
+                onClick={() => setViewMode('calendar')}
+              >
+                <ImCalendar /> Calendar View
+              </button>
+            </div>
+            <div className={styles.actionButtons}>
+              <button
+                className={styles.actionButton}
+                onClick={() => setShowNotificationPrefs(true)}
+                title="Notification Preferences"
+              >
+                <IoIosNotifications />
+              </button>
+              <button
+                className={styles.actionButton}
+                onClick={() => setShowFeedback(true)}
+                title="Give Feedback"
+              >
+                <RiFeedbackLine />
+              </button>
+            </div>
+          </div>
+
+          {viewMode === 'grid' ? (
+            <div className={styles.eventsCardsContent}>
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, index) => (
+                  <EventCardSkeleton key={index} />
+                ))
+              ) : filteredAndSortedEvents.length > 0 ? (
+                filteredAndSortedEvents.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))
+              ) : (
+                <div className={styles.noResults}>
+                  <h3>No events found</h3>
+                  <p>Try adjusting your search criteria or filters.</p>
+                  <button 
+                    className={styles.clearFiltersButton}
+                    onClick={handleClearFilters}
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <CalendarView
+              events={filteredAndSortedEvents}
+              onEventClick={handleEventClick}
+            />
+          )}
         </div>
       </div>
-    </div>
+      <BackToTop />
+      
+      <NotificationPreferences
+        isOpen={showNotificationPrefs}
+        onClose={() => setShowNotificationPrefs(false)}
+      />
+      
+      <EventFeedback
+        eventId={selectedEventForFeedback?.id}
+        isOpen={showFeedback}
+        onClose={() => {
+          setShowFeedback(false);
+          setSelectedEventForFeedback(null);
+        }}
+      />
+    </>
   );
 };
 

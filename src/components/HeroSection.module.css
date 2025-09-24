@@ -8,6 +8,7 @@
   position: relative;
   z-index: 2;
   min-height: 100vh;
+  
 }
 
 .heroContainer {
@@ -34,6 +35,7 @@
   text-align: left;
   /* Change to left align for better layout */
   max-width: 600px;
+  margin-left: 4rem;
 }
 
 .contentRight {
@@ -43,6 +45,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  /* padding: 8rem; */
+
 }
 
 .title {

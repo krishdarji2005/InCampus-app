@@ -1,0 +1,46 @@
+.backToTop {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(59, 130, 246, 0.9);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.backToTop:hover {
+    background: rgba(59, 130, 246, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.backToTop:active {
+    transform: translateY(0);
+}
+
+.backToTop svg {
+    transition: transform 0.2s ease;
+}
+
+.backToTop:hover svg {
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .backToTop {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 45px;
+        height: 45px;
+    }
+}

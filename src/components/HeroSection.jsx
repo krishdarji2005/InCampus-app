@@ -4,7 +4,7 @@ import styles from "./HeroSection.module.css";
 import BlurText from "../TextAnimations/BlurText/BlurText";
 import Button from "./Button/Button";
 import { Link, useNavigate } from "react-router-dom";
-import HeroImg from "../assets/RightImg.svg";
+import HeroImg from "../assets/rightImageWoutSh.svg";
 import { useAuth0 } from "@auth0/auth0-react";
 import RotatingText from "../TextAnimations/RotatingText/RotatingText";
 const HeroSection = () => {

@@ -1,0 +1,239 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: rgba(12, 10, 9, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    backdrop-filter: blur(10px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.content {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h4 {
+    color: white;
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ratingContainer {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.star {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.star:hover {
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+.star.active {
+    color: #fbbf24;
+}
+
+.ratingText {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.feedbackTextarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.875rem;
+    resize: vertical;
+    min-height: 100px;
+    transition: all 0.2s ease;
+}
+
+.feedbackTextarea:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.feedbackTextarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.quickFeedback {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.quickFeedbackButton {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quickFeedbackButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.quickFeedbackButton.selected {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+    color: #60a5fa;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cancelButton,
+.submitButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.cancelButton {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cancelButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.submitButton {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.submitButton:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-1px);
+}
+
+.cancelButton:disabled,
+.submitButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .modal {
+        width: 95%;
+        margin: 1rem;
+    }
+
+    .header,
+    .content,
+    .footer {
+        padding: 1rem;
+    }
+
+    .star {
+        font-size: 1.5rem;
+    }
+
+    .quickFeedback {
+        gap: 0.25rem;
+    }
+
+    .quickFeedbackButton {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.6rem;
+    }
+}

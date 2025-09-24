@@ -1,0 +1,13 @@
+.flowingMenuSection {
+    width: 100vw;
+    height: 600px;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    overflow: hidden;
+ 
+    /* background: url("../../assets/darkbg.png"); */
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%), #000000;
+}

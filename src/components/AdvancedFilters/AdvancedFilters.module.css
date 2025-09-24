@@ -1,0 +1,250 @@
+.filtersContainer {
+    /* background: rgba(255, 255, 255, 0.05); */
+    background: #23232525;
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+}
+
+.filtersHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.filtersTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.filtersTitle h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.activeFiltersCount {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.filtersActions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.clearButton,
+.expandButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clearButton:hover,
+.expandButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.clearButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quickFilters {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.filterGroup label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.filterChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filterChip {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.filterChip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filterChip.active {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #60a5fa;
+}
+
+.sortGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.sortSelect {
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sortSelect:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sortSelect:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.advancedFilters {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.filterRow {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filterSelect {
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filterSelect:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dateRange {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dateInput {
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.dateInput:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dateSeparator {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+    .filterRow {
+        flex-direction: row;
+        gap: 2rem;
+    }
+
+    .filterGroup {
+        flex: 1;
+    }
+
+    .dateRange {
+        flex-direction: row;
+    }
+}
+
+@media (max-width: 768px) {
+    .filtersHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .filtersActions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filterChips {
+        justify-content: flex-start;
+    }
+
+    .dateRange {
+        flex-direction: column;
+    }
+
+    .dateSeparator {
+        display: none;
+    }
+}

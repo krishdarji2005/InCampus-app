@@ -46,7 +46,7 @@ const Navbar = () => {
                 <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
                   {/* {console.log(user)} */}
                   
-                  <img src={user?.picture} alt="profile" style={{width:32,height:32,borderRadius:'50%'}} />
+                  <img src={user.picture} alt="profile" style={{width:32,height:32,borderRadius:'50%'}} />
                   <span style={{color:'white',fontWeight:300}}>{user?.name}</span>
                   <button className={styles.signIn} onClick={() => logout({ returnTo: window.location.origin })}>Sign Out</button>
                 </div>
