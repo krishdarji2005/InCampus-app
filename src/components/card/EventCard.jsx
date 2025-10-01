@@ -96,8 +96,8 @@ END:VCALENDAR`;
           alt={event.title}
           className={styles.image}
           effect="blur"
-          width={80}
-          height={80}
+          width={100}
+          height={100}
         />
         <div className={styles.formatBadge}>
           <span className={styles.formatIcon}>{getFormatIcon()}</span>

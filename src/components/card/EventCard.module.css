@@ -29,8 +29,8 @@
 
 .imageWrapper {
   flex-shrink: 0;
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   overflow: hidden;
   border-radius: 6px;
   position: relative;
