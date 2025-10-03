@@ -14,6 +14,7 @@
   will-change: transform;
   backdrop-filter: blur(4px);
   position: relative;
+  contain: layout style paint;
 }
 
 .card:hover {
@@ -34,6 +35,7 @@
   overflow: hidden;
   border-radius: 6px;
   position: relative;
+  aspect-ratio: 1;
 }
 
 .image {
@@ -41,12 +43,22 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  transition: opacity 0.3s ease;
+  /* loading:eager; */
+}
+.image.loading {
+  opacity: 0;
+}
+
+.image.loaded {
+  opacity: 1;
 }
 
 .details {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .meta {
@@ -81,6 +93,7 @@
   /* Limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-rendering: optimizeSpeed;
 }
 
 .author {

@@ -1,6 +1,6 @@
-import React from "react";
-import { MdArrowOutward } from "react-icons/md";
-import { NavLink } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { MdArrowOutward, MdPerson, MdSettings, MdLogout } from "react-icons/md";
+import { NavLink, useNavigate } from "react-router-dom";
 import styles from "./Navbar.module.css";
 import InCampusFinalLogoo from "../assets/InCampusFinalLogoo.svg";
 import { useAuth0, User } from "@auth0/auth0-react";
@@ -16,6 +16,27 @@ const Navbar = () => {
     logout,
     error
   } = useAuth0();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleProfileClick = () => {
+    navigate('/profile');
+    setShowDropdown(false);
+  };
 
   if (isLoading) return <div className={styles.navContainer}>Loading...</div>;
   if (error) return <div className={styles.navContainer} style={{color:'red'}}>Auth Error</div>;
@@ -43,12 +64,32 @@ const Navbar = () => {
               {!isAuthenticated ? (
                 <button className={styles.signIn} onClick={() => loginWithRedirect()}>Sign In</button>
               ) : (
-                <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
-                  {/* {console.log(user)} */}
+                <div className={styles.profileContainer} ref={dropdownRef}>
+                  <div 
+                    className={styles.profileButton} 
+                    onClick={() => setShowDropdown(!showDropdown)}
+                  >
+                    <img src={user.picture} alt="profile" className={styles.profileImage} />
+                    <span className={styles.userName}>{user?.name}</span>
+                  </div>
                   
-                  <img src={user.picture} alt="profile" style={{width:32,height:32,borderRadius:'50%'}} />
-                  <span style={{color:'white',fontWeight:300}}>{user?.name}</span>
-                  <button className={styles.signIn} onClick={() => logout({ returnTo: window.location.origin })}>Sign Out</button>
+                  {showDropdown && (
+                    <div className={styles.profileDropdown}>
+                      <div className={styles.dropdownItem} onClick={handleProfileClick}>
+                        <MdPerson /> Profile
+                      </div>
+                      <div className={styles.dropdownItem}>
+                        <MdSettings /> Settings
+                      </div>
+                      <div className={styles.dropdownDivider}></div>
+                      <div 
+                        className={styles.dropdownItem} 
+                        onClick={() => logout({ returnTo: window.location.origin })}
+                      >
+                        <MdLogout /> Sign Out
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </li>

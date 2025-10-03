@@ -366,7 +366,7 @@ const EventDetails = () => {
       <RegistrationModal
         isOpen={isRegistrationModalOpen}
         onClose={() => setIsRegistrationModalOpen(false)}
-        eventTitle={event?.title}
+        event={event}
         onSubmit={handleRegistrationSubmit}
       />
     </div>

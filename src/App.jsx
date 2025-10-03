@@ -7,11 +7,13 @@ import { AuthWrapper, ProtectedRoute } from './auth/AuthWrapper';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ErrorPage from "./pages/ErrorPage";
 
 const router = createBrowserRouter([
   {
     path:"/",
     element:<AuthWrapper><ErrorBoundary><AppLayout/></ErrorBoundary></AuthWrapper>,
+    errorElement : <ErrorPage/>,
     children:[
       {
         path:"/",
@@ -24,7 +26,8 @@ const router = createBrowserRouter([
       {
         path:"/events/:id",
         element:<ProtectedRoute><EventDetails/></ProtectedRoute>
-      }
+      },
+ 
     ]
   }
 ])

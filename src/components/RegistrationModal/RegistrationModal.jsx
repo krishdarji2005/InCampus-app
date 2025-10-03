@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./RegistrationModal.module.css";
 import { MdClose, MdCheckCircle, MdError } from "react-icons/md";
+import { toast } from 'react-toastify';
 
-const RegistrationModal = ({ isOpen, onClose, eventTitle, onSubmit }) => {
+const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    department: "",
+    year: "",
     reason: "",
     phone: ""
   });
@@ -24,6 +27,14 @@ const RegistrationModal = ({ isOpen, onClose, eventTitle, onSubmit }) => {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
+    }
+    
+    if (!formData.department.trim()) {
+      newErrors.department = "Department is required";
+    }
+    
+    if (!formData.year.trim()) {
+      newErrors.year = "Year is required";
     }
     
     if (!formData.reason.trim()) {
@@ -92,7 +103,7 @@ const RegistrationModal = ({ isOpen, onClose, eventTitle, onSubmit }) => {
   const handleClose = () => {
     if (isSubmitting) return; // Prevent closing while submitting
     
-    setFormData({ name: "", email: "", reason: "", phone: "" });
+    setFormData({ name: "", email: "", department: "", year: "", reason: "", phone: "" });
     setErrors({});
     setIsSubmitting(false);
     setIsSuccess(false);
@@ -118,7 +129,7 @@ const RegistrationModal = ({ isOpen, onClose, eventTitle, onSubmit }) => {
 
         <div className={styles.content}>
           <div className={styles.eventInfo}>
-            <h3 className={styles.eventTitle}>{eventTitle}</h3>
+            <h3 className={styles.eventTitle}>{event.title}</h3>
             <p className={styles.eventNote}>
               Your registration request will be reviewed by the event organizer.
             </p>
