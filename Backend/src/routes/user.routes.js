@@ -1,19 +1,19 @@
 const express = require('express');
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const {
-  register,
-  login,
-  getMe,
-  updateProfile,
-  changePassword,
-  logout
-} = require('../controllers/auth.controller');
-const { authenticateToken } = require('../middlewares/auth.middleware');
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  getUserStats
+} = require('../controllers/user.controller');
+const { authenticateToken, requireAdmin, requireCommittee } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
 // Validation rules
-const registerValidation = [
+const createUserValidation = [
   body('name')
     .trim()
     .isLength({ min: 2, max: 50 })
@@ -25,6 +25,10 @@ const registerValidation = [
   body('password')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
+  body('role')
+    .optional()
+    .isIn(['student', 'committee', 'admin'])
+    .withMessage('Invalid role'),
   body('studentId')
     .optional()
     .trim()
@@ -45,22 +49,21 @@ const registerValidation = [
     .withMessage('Phone must be a valid 10-digit number')
 ];
 
-const loginValidation = [
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Please provide a valid email'),
-  body('password')
-    .notEmpty()
-    .withMessage('Password is required')
-];
-
-const updateProfileValidation = [
+const updateUserValidation = [
   body('name')
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('Name must be between 2 and 50 characters'),
+  body('email')
+    .optional()
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please provide a valid email'),
+  body('role')
+    .optional()
+    .isIn(['student', 'committee', 'admin'])
+    .withMessage('Invalid role'),
   body('studentId')
     .optional()
     .trim()
@@ -78,24 +81,25 @@ const updateProfileValidation = [
   body('phone')
     .optional()
     .matches(/^[0-9]{10}$/)
-    .withMessage('Phone must be a valid 10-digit number')
+    .withMessage('Phone must be a valid 10-digit number'),
+  body('isActive')
+    .optional()
+    .isBoolean()
+    .withMessage('isActive must be a boolean value')
 ];
 
-const changePasswordValidation = [
-  body('currentPassword')
-    .notEmpty()
-    .withMessage('Current password is required'),
-  body('newPassword')
-    .isLength({ min: 6 })
-    .withMessage('New password must be at least 6 characters long')
+const userIdValidation = [
+  param('id')
+    .isMongoId()
+    .withMessage('Invalid user ID')
 ];
 
 // Routes
-router.post('/register', registerValidation, register);
-router.post('/login', loginValidation, login);
-router.get('/me', authenticateToken, getMe);
-router.put('/profile', authenticateToken, updateProfileValidation, updateProfile);
-router.put('/change-password', authenticateToken, changePasswordValidation, changePassword);
-router.post('/logout', authenticateToken, logout);
+router.get('/', authenticateToken, requireAdmin, getUsers);
+router.get('/stats', authenticateToken, requireAdmin, getUserStats);
+router.get('/:id', authenticateToken, userIdValidation, getUser);
+router.post('/', authenticateToken, requireAdmin, createUserValidation, createUser);
+router.put('/:id', authenticateToken, requireCommittee, userIdValidation, updateUserValidation, updateUser);
+router.delete('/:id', authenticateToken, requireAdmin, userIdValidation, deleteUser);
 
 module.exports = router;

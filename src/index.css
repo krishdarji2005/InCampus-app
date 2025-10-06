@@ -11,6 +11,7 @@
 body {
   background-color: #000;
   overflow-x: hidden;
+  /* margin-top: 60px; */
 }
 
 /* Remove the conflicting styles that were overriding your components */

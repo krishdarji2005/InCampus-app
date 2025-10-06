@@ -1,31 +1,37 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
-    trim: true
+    trim: true,
+    minlength: [2, 'Name must be at least 2 characters long'],
+    maxlength: [50, 'Name cannot exceed 50 characters']
   },
   email: {
     type: String,
     required: [true, 'Email is required'],
     unique: true,
-    trim: true,
     lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
+    trim: true,
+    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters'],
-    select: false
+    minlength: [6, 'Password must be at least 6 characters long']
   },
   role: {
     type: String,
     enum: ['student', 'committee', 'admin'],
     default: 'student'
+  },
+  studentId: {
+    type: String,
+    unique: true,
+    sparse: true, // Allows multiple null values
+    trim: true
   },
   department: {
     type: String,
@@ -33,25 +39,35 @@ const userSchema = new mongoose.Schema({
   },
   year: {
     type: String,
-    enum: ['FE', 'SE', 'TE', 'BE', 'Other'],
-    default: 'Other'
+    enum: ['1st', '2nd', '3rd', '4th', 'Masters', 'PhD'],
+    default: '1st'
   },
-  registeredEvents: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Event'
-  }],
-  createdAt: {
-    type: Date,
-    default: Date.now
+  phone: {
+    type: String,
+    trim: true,
+    match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit phone number']
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  lastLogin: {
+    type: Date
+  },
+  profileImage: {
+    type: String,
+    default: ''
   }
-}, { timestamps: true });
+}, {
+  timestamps: true
+});
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
   try {
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
@@ -59,20 +75,16 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Method to check if password matches
-userSchema.methods.matchPassword = async function(enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// Method to generate JWT token
-userSchema.methods.generateAuthToken = function() {
-  return jwt.sign(
-    { id: this._id, role: this.role },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '30d' }
-  );
+// Remove password from JSON output
+userSchema.methods.toJSON = function() {
+  const user = this.toObject();
+  delete user.password;
+  return user;
 };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

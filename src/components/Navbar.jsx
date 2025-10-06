@@ -53,7 +53,7 @@ const Navbar = () => {
         <nav>
           <ul className={styles.navLinks}>
             <li>
-              <NavLink to="/">Communities</NavLink>
+              <NavLink to="/committees">Communities</NavLink>
             </li>
             <li>
               <NavLink to="/events">

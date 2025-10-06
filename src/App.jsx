@@ -8,6 +8,8 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ErrorPage from "./pages/ErrorPage";
+import Committees from "./pages/Committees";
+
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,10 @@ const router = createBrowserRouter([
       {
         path:"/events/:id",
         element:<ProtectedRoute><EventDetails/></ProtectedRoute>
+      },
+      {
+        path:"/committees",
+        element:<ProtectedRoute><Committees/></ProtectedRoute>
       },
  
     ]
