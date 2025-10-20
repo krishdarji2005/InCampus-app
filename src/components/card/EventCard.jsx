@@ -8,6 +8,8 @@ import { IoBookmark } from "react-icons/io5";
 import { IoBookmarkOutline } from "react-icons/io5";
 import { GrMapLocation } from "react-icons/gr";
 import { TbCalendarPlus } from "react-icons/tb";
+import { MdPeople } from "react-icons/md";
+
 const EventCard = React.memo(function EventCard({ event }) {
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -23,18 +25,11 @@ const EventCard = React.memo(function EventCard({ event }) {
 
   const handleAddToCalendar = (e) => {
     e.stopPropagation();
-    // Create calendar event data
-    const startDate = new Date(event.date);
-    const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
     
-    const calendarData = {
-      title: event.title,
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      location: event.location,
-      description: event.description || event.title
-    };
-
+    // Combine date and time for proper calendar entry
+    const eventDateTime = new Date(`${event.date}T${convertTimeTo24Hour(event.time)}`);
+    const endDateTime = new Date(eventDateTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
+    
     // Create .ics file content
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -42,11 +37,11 @@ PRODID:-//InCampus//Event Calendar//EN
 BEGIN:VEVENT
 UID:${event.id}@incampus.com
 DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTART:${eventDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTEND:${endDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
 SUMMARY:${event.title}
 DESCRIPTION:${event.description || event.title}
-LOCATION:${event.location}
+LOCATION:${event.venue}
 END:VEVENT
 END:VCALENDAR`;
 
@@ -62,6 +57,19 @@ END:VCALENDAR`;
     window.URL.revokeObjectURL(url);
   };
 
+  // Helper function to convert 12-hour time to 24-hour format
+  const convertTimeTo24Hour = (time12h) => {
+    const [time, modifier] = time12h.split(' ');
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') {
+      hours = '00';
+    }
+    if (modifier === 'PM') {
+      hours = parseInt(hours, 10) + 12;
+    }
+    return `${hours.padStart(2, '0')}:${minutes}:00`;
+  };
+
   const getFormatIcon = () => {
     switch (event.format) {
       case 'Virtual':
@@ -75,29 +83,58 @@ END:VCALENDAR`;
 
   const getCategoryColor = () => {
     switch (event.category) {
-      case 'Academic':
+      case 'Technical':
         return '#3b82f6';
-      case 'Professional':
+      case 'Cultural':
         return '#10b981';
-      case 'Social':
-        return '#f59e0b';
       case 'Sports':
         return '#ef4444';
+      case 'Academic':
+        return '#8b5cf6';
+      case 'Workshop':
+        return '#f59e0b';
+      case 'Seminar':
+        return '#06b6d4';
+      case 'Competition':
+        return '#ec4899';
+      case 'Social':
+        return '#84cc16';
+      case 'Art & Craft':
+        return '#f97316';
+      case 'Music':
+        return '#a855f7';
+      case 'Dance':
+        return '#e11d48';
+      case 'Literature':
+        return '#059669';
       default:
         return '#6b7280';
     }
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
     <article className={styles.card} onClick={handleClick} role="button" tabIndex={0}>
       <div className={styles.imageWrapper}>
         <LazyLoadImage
-          src={event.image}
+          src={event.image || CardImage}
           alt={event.title}
           className={styles.image}
           effect="blur"
           width={100}
           height={100}
+          onError={(e) => {
+            e.target.src = CardImage;
+          }}
         />
         <div className={styles.formatBadge}>
           <span className={styles.formatIcon}>{getFormatIcon()}</span>
@@ -106,17 +143,29 @@ END:VCALENDAR`;
       </div>
       <div className={styles.details}>
         <div className={styles.meta}>
-          <time dateTime={new Date(event.date).toISOString()}>{event.date}</time>
+          <time dateTime={new Date(event.date).toISOString()}>
+            {formatDate(event.date)}
+          </time>
           <span className={styles.dot}>•</span>
           <span>{event.time}</span>
           <span className={styles.dot}>•</span>
           <span className={styles.price}>{event.price}</span>
         </div>
+        
         <h3 className={styles.title}>{event.title}</h3>
+        
+        <p className={styles.description}>
+          {event.description && event.description.length > 100
+            ? `${event.description.substring(0, 100)}...`
+            : event.description
+          }
+        </p>
+        
         <div className={styles.location}>
-          <span className={styles.locationIcon}> {<GrMapLocation/>} </span>
-          <span>{event.location}</span>
+          <span className={styles.locationIcon}><GrMapLocation/></span>
+          <span>{event.venue}</span>
         </div>
+        
         <div className={styles.category}>
           <span 
             className={styles.categoryTag}
@@ -125,9 +174,10 @@ END:VCALENDAR`;
             {event.category}
           </span>
         </div>
+        
         <div className={styles.author}>
           <img
-            src={event.authorImage}
+            src={event.authorImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.author)}&background=8b5cf6&color=fff`}
             alt={event.author}
             className={styles.avatar}
             width={20}
@@ -135,6 +185,13 @@ END:VCALENDAR`;
           />
           <span>{event.author}</span>
         </div>
+
+        {/* Registration count */}
+        <div className={styles.registrationInfo}>
+          <MdPeople className={styles.peopleIcon} />
+          <span>{event.registrationCount || 0} registered</span>
+        </div>
+        
         <div className={styles.actions}>
           <button 
             className={`${styles.actionButton} ${isBookmarked ? styles.bookmarked : ''}`}
@@ -143,12 +200,22 @@ END:VCALENDAR`;
           >
             {isBookmarked ? <IoBookmark /> : <IoBookmarkOutline />}
           </button>
+          
           <button 
             className={styles.actionButton}
             onClick={handleAddToCalendar}
             title="Add to calendar"
           >
             <TbCalendarPlus />
+          </button>
+          
+          {/* View Details button instead of Register */}
+          <button 
+            className={styles.viewDetailsButton}
+            onClick={handleClick}
+            title="View event details"
+          >
+            View Details
           </button>
         </div>
       </div>

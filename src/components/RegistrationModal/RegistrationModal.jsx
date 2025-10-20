@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./RegistrationModal.module.css";
 import { MdClose, MdCheckCircle, MdError } from "react-icons/md";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -10,88 +10,88 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
     department: "",
     year: "",
     reason: "",
-    phone: ""
+    phone: "",
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false); 
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
-    
+
     if (!formData.department.trim()) {
       newErrors.department = "Department is required";
     }
-    
+
     if (!formData.year.trim()) {
       newErrors.year = "Year is required";
     }
-    
+
     if (!formData.reason.trim()) {
       newErrors.reason = "Please tell us why you want to join this event";
     } else if (formData.reason.trim().length < 10) {
-      newErrors.reason = "Please provide a more detailed reason (at least 10 characters)";
+      newErrors.reason =
+        "Please provide a more detailed reason (at least 10 characters)";
     }
-    
+
     if (formData.phone && !/^\d{10}$/.test(formData.phone.replace(/\D/g, ""))) {
       newErrors.phone = "Please enter a valid 10-digit phone number";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       // Call parent onSubmit with form data
       if (onSubmit) {
         onSubmit(formData);
       }
-      
+
       setIsSuccess(true);
-      
+
       // Auto close after 2 seconds
       setTimeout(() => {
         handleClose();
       }, 2000);
-      
     } catch (error) {
       console.error("Registration failed:", error);
       setErrors({ submit: "Registration failed. Please try again." });
@@ -102,8 +102,15 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
 
   const handleClose = () => {
     if (isSubmitting) return; // Prevent closing while submitting
-    
-    setFormData({ name: "", email: "", department: "", year: "", reason: "", phone: "" });
+
+    setFormData({
+      name: "",
+      email: "",
+      department: "",
+      year: "",
+      reason: "",
+      phone: "",
+    });
     setErrors({});
     setIsSubmitting(false);
     setIsSuccess(false);
@@ -117,8 +124,8 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>Request to Join Event</h2>
-          <button 
-            className={styles.closeButton} 
+          <button
+            className={styles.closeButton}
             onClick={handleClose}
             disabled={isSubmitting}
             aria-label="Close modal"
@@ -138,9 +145,12 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
           {isSuccess ? (
             <div className={styles.successState}>
               <MdCheckCircle className={styles.successIcon} size={48} />
-              <h3 className={styles.successTitle}>Registration Request Sent!</h3>
+              <h3 className={styles.successTitle}>
+                Registration Request Sent!
+              </h3>
               <p className={styles.successMessage}>
-                You'll receive a confirmation email shortly. The organizer will review your request and notify you of the decision.
+                You'll receive a confirmation email shortly. The organizer will
+                review your request and notify you of the decision.
               </p>
             </div>
           ) : (
@@ -155,7 +165,9 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
+                  className={`${styles.input} ${
+                    errors.name ? styles.inputError : ""
+                  }`}
                   placeholder="Enter your full name"
                   disabled={isSubmitting}
                 />
@@ -165,7 +177,6 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   </span>
                 )}
               </div>
-
               <div className={styles.formGroup}>
                 <label htmlFor="email" className={styles.label}>
                   Email Address *
@@ -176,7 +187,9 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`${styles.input} ${errors.email ? styles.inputError : ""}`}
+                  className={`${styles.input} ${
+                    errors.email ? styles.inputError : ""
+                  }`}
                   placeholder="Enter your email address"
                   disabled={isSubmitting}
                 />
@@ -186,7 +199,6 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   </span>
                 )}
               </div>
-
               <div className={styles.formGroup}>
                 <label htmlFor="phone" className={styles.label}>
                   Phone Number (Optional)
@@ -197,7 +209,9 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`${styles.input} ${errors.phone ? styles.inputError : ""}`}
+                  className={`${styles.input} ${
+                    errors.phone ? styles.inputError : ""
+                  }`}
                   placeholder="Enter your phone number"
                   disabled={isSubmitting}
                 />
@@ -207,7 +221,6 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   </span>
                 )}
               </div>
-
               <div className={styles.formGroup}>
                 <label htmlFor="reason" className={styles.label}>
                   Why do you want to join this event? *
@@ -217,7 +230,9 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   name="reason"
                   value={formData.reason}
                   onChange={handleInputChange}
-                  className={`${styles.textarea} ${errors.reason ? styles.inputError : ""}`}
+                  className={`${styles.textarea} ${
+                    errors.reason ? styles.inputError : ""
+                  }`}
                   placeholder="Tell us about your interest in this event..."
                   rows={4}
                   disabled={isSubmitting}
@@ -228,13 +243,61 @@ const RegistrationModal = ({ isOpen, onClose, event, onSubmit }) => {
                   </span>
                 )}
               </div>
-
+          
+              <div className={styles.formGroup}>
+                <label htmlFor="department" className={styles.label}>
+                  Department *
+                </label>
+                <input
+                  type="text"
+                  id="department"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className={`${styles.input} ${
+                    errors.department ? styles.inputError : ""
+                  }`}
+                  placeholder="Enter your department"
+                  disabled={isSubmitting}
+                />
+                {errors.department && (
+                  <span className={styles.errorMessage}>
+                    <MdError size={16} /> {errors.department}
+                  </span>
+                )}
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="year" className={styles.label}>
+                  Year *
+                </label>
+                <select
+                  id="year"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleInputChange}
+                  className={`${styles.input} ${
+                    errors.year ? styles.inputError : ""
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  <option value="">Select your year</option>
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                  <option value="Postgraduate">Postgraduate</option>
+                </select>
+                {errors.year && (
+                  <span className={styles.errorMessage}>
+                    <MdError size={16} /> {errors.year}
+                  </span>
+                )}
+              </div>
               {errors.submit && (
                 <div className={styles.submitError}>
                   <MdError size={16} /> {errors.submit}
                 </div>
               )}
-
               <div className={styles.buttonGroup}>
                 <button
                   type="button"

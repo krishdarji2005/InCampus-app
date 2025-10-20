@@ -1,4 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth0 } from '@auth0/auth0-react';
+import { FixedSizeGrid as Grid } from "react-window";
 import styles from "./Events.module.css";
 import EventCard from "../components/card/EventCard";
 import SearchRow from "../components/SearchRow/SearchRow";
@@ -9,12 +13,22 @@ import CalendarView from "../components/CalendarView/CalendarView";
 import NotificationPreferences from "../components/NotificationPreferences/NotificationPreferences";
 import EventFeedback from "../components/EventFeedback/EventFeedback";
 import EventCardSkeleton from "../components/LoadingSkeleton/EventCardSkeleton";
-import { events as allEvents } from "../data/events";
 import { IoIosNotifications } from "react-icons/io";
 import { RiFeedbackLine } from "react-icons/ri";
 import { ImCalendar } from "react-icons/im";
 import { BsFillGrid3X3GapFill } from "react-icons/bs";
+
 const Events = () => {
+  const navigate = useNavigate();
+  const { user: auth0User, isAuthenticated } = useAuth0();
+  const GUTTER = 16;
+
+  // State for MongoDB events
+  const [allEvents, setAllEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Existing state
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [filters, setFilters] = useState({
@@ -26,15 +40,105 @@ const Events = () => {
     dateRange: { start: '', end: '' }
   });
   const [sortBy, setSortBy] = useState('date-asc');
-  const [viewMode, setViewMode] = useState('grid'); // grid or calendar
+  const [viewMode, setViewMode] = useState('grid');
   const [bookmarkedEvents, setBookmarkedEvents] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [selectedEventForFeedback, setSelectedEventForFeedback] = useState(null);
+  
   const events = allEvents;
 
-  // Responsive columns
+  // Fetch events from MongoDB
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching events from backend...');
+      
+      const response = await fetch('http://localhost:5000/api/events');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      
+      const eventsData = await response.json();
+      console.log('Fetched events:', eventsData);
+      
+      // Transform MongoDB data to match your existing component structure
+      const transformedEvents = eventsData.map(event => ({
+        id: event._id,
+        title: event.title,
+        description: event.description,
+        date: new Date(event.date).toISOString().split('T')[0], // Format: YYYY-MM-DD
+        time: new Date(event.date).toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        }),
+        venue: event.venue,
+        category: event.category,
+        image: event.image || '',
+        author: event.author,
+        authorId: event.authorId,
+        registrationCount: event.registrationCount || 0,
+        status: event.status,
+        // Add default values for existing component compatibility
+        format: 'In-Person', // Default value
+        price: 'Free', // Default value
+        department: 'General', // Default value
+        tags: [event.category], // Use category as tag
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt
+      }));
+      
+      setAllEvents(transformedEvents);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError(err.message);
+      toast.error('Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Register for event
+  const handleRegister = async (eventId) => {
+    try {
+      const userId = localStorage.getItem('userId');
+      
+      if (!userId) {
+        toast.error('Please complete your profile first');
+        navigate('/profile');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:5000/api/events/${eventId}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (response.ok) {
+        toast.success('Successfully registered for the event!');
+        fetchEvents(); // Refresh events to update registration count
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to register for event');
+      }
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      toast.error('Network error. Please try again.');
+    }
+  };
+
+  // Load events on component mount
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // Responsive columns logic
   const getColumnCount = () => {
     if (typeof window === "undefined") return 1;
     if (window.innerWidth < 480) return 1;
@@ -42,7 +146,9 @@ const Events = () => {
     if (window.innerWidth < 1200) return 3;
     return 4;
   };
+  
   const [columnCount, setColumnCount] = React.useState(getColumnCount());
+  
   React.useEffect(() => {
     const handleResize = () => setColumnCount(getColumnCount());
     window.addEventListener("resize", handleResize);
@@ -55,7 +161,7 @@ const Events = () => {
   // Cell renderer for react-window Grid
   const Cell = ({ columnIndex, rowIndex, style }) => {
     const idx = rowIndex * columnCount + columnIndex;
-    if (idx >= events.length) return null;
+    if (idx >= filteredAndSortedEvents.length) return null;
     return (
       <div
         style={{
@@ -64,10 +170,15 @@ const Events = () => {
           top: style.top + GUTTER / 2,
         }}
       >
-        <EventCard key={events[idx].id} event={events[idx]} />
+        <EventCard 
+          key={filteredAndSortedEvents[idx].id} 
+          event={filteredAndSortedEvents[idx]} 
+          // onRegister={() => handleRegister(filteredAndSortedEvents[idx].id)}
+        />
       </div>
     );
   };
+
   // Filtering and sorting logic
   const filteredAndSortedEvents = useMemo(() => {
     let filtered = events.filter(event => {
@@ -147,7 +258,7 @@ const Events = () => {
         case 'alphabetical':
           return a.title.localeCompare(b.title);
         case 'recent':
-          return b.id - a.id; // Assuming higher ID means more recent
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         default:
           return 0;
       }
@@ -156,6 +267,7 @@ const Events = () => {
     return filtered;
   }, [events, search, filters, sortBy]);
 
+  // Event handlers
   const handleClearFilters = () => {
     setFilters({
       category: 'All',
@@ -169,8 +281,7 @@ const Events = () => {
   };
 
   const handleEventClick = (event) => {
-    // Navigate to event details
-    window.location.href = `/events/${event.id}`;
+    navigate(`/events/${event.id}`);
   };
 
   const handleFeedbackClick = (event) => {
@@ -178,6 +289,51 @@ const Events = () => {
     setShowFeedback(true);
   };
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className={styles.eventsContainer}>
+        <div className={styles.eventsContent}>
+          <Breadcrumb />
+          <div className={styles.eventsTextContent}>
+            <h2 className={styles.eventsTitle}>Loading Events...</h2>
+          </div>
+          <div className={styles.eventsCardsContent}>
+            {Array.from({ length: 6 }).map((_, index) => (
+              <EventCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className={styles.eventsContainer}>
+        <div className={styles.eventsContent}>
+          <Breadcrumb />
+          <div className={styles.eventsTextContent}>
+            <h2 className={styles.eventsTitle}>Error Loading Events</h2>
+            <p className={styles.eventsDescription}>
+              {error}
+            </p>
+            <button 
+              className={styles.clearFiltersButton}
+              onClick={fetchEvents}
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+// Add this in your EventDetails.jsx right before the return statement:
+// console.log("Event object:", event);
+// console.log("Event image URL:", event?.image);
+// console.log("Image src being used:", event.image || "/default-event-image.jpg");
   return (
     <>
       <div className={styles.eventsContainer}>
@@ -194,6 +350,15 @@ const Events = () => {
               <span className={styles.eventsCount}>
                 {filteredAndSortedEvents.length} events found
               </span>
+              {/* Create Event Button for authenticated users */}
+              {isAuthenticated && (
+                <button
+                  onClick={() => navigate('/create-event')}
+                  className={styles.createEventButton}
+                >
+                  + Create New Event
+                </button>
+              )}
             </div>
           </div>
 
@@ -252,9 +417,30 @@ const Events = () => {
                   <EventCardSkeleton key={index} />
                 ))
               ) : filteredAndSortedEvents.length > 0 ? (
-                filteredAndSortedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))
+                useVirtual ? (
+                  <Grid
+                    columnCount={columnCount}
+                    columnWidth={300 + GUTTER}
+                    height={600}
+                    rowCount={Math.ceil(filteredAndSortedEvents.length / columnCount)}
+                    rowHeight={400 + GUTTER}
+                    width="100%"
+                    style={{
+                      paddingLeft: GUTTER / 2,
+                      paddingTop: GUTTER / 2,
+                    }}
+                  >
+                    {Cell}
+                  </Grid>
+                ) : (
+                  filteredAndSortedEvents.map((event) => (
+                    <EventCard 
+                      key={event.id} 
+                      event={event} 
+                      // onRegister={() => handleRegister(event.id)}
+                    />
+                  ))
+                )
               ) : (
                 <div className={styles.noResults}>
                   <h3>No events found</h3>
