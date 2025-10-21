@@ -4,7 +4,10 @@ import CommitteLogosScroll from "../components/CommitteLogosScroll";
 import BentoWTxt from "../components/BentoWTxt";
 import FlowingMenuSection from "../components/FlowingMenuSection/FlowingMenuSection";
 // import DarkVeil from "../background/DarkVeil/DarkVeil";
+import QuickStatistics from "../components/QuickStatistics/QuickStatistics";
 import styles from "./Home.module.css";
+import FAQSection from "../components/FAQSection/FAQSection";
+
 
 const Home = () => {
   return (
@@ -14,9 +17,11 @@ const Home = () => {
       </div>
       <div className={styles.contentLayer}>
         <HeroSection />
-        <CommitteLogosScroll />
+        {/* <CommitteLogosScroll /> */}
+        <QuickStatistics />
         <BentoWTxt />
-        <FlowingMenuSection />
+        {/* <FlowingMenuSection /> */}
+        <FAQSection/>
       </div>
     </div>
   );

@@ -50,57 +50,64 @@ const Events = () => {
   const events = allEvents;
 
   // Fetch events from MongoDB
-  const fetchEvents = async () => {
-    try {
-      setLoading(true);
-      console.log('Fetching events from backend...');
-      
-      const response = await fetch('http://localhost:5000/api/events');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-      
-      const eventsData = await response.json();
-      console.log('Fetched events:', eventsData);
-      
-      // Transform MongoDB data to match your existing component structure
-      const transformedEvents = eventsData.map(event => ({
-        id: event._id,
-        title: event.title,
-        description: event.description,
-        date: new Date(event.date).toISOString().split('T')[0], // Format: YYYY-MM-DD
-        time: new Date(event.date).toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
-          minute: '2-digit',
-          hour12: true 
-        }),
-        venue: event.venue,
-        category: event.category,
-        image: event.image || '',
-        author: event.author,
-        authorId: event.authorId,
-        registrationCount: event.registrationCount || 0,
-        status: event.status,
-        // Add default values for existing component compatibility
-        format: 'In-Person', // Default value
-        price: 'Free', // Default value
-        department: 'General', // Default value
-        tags: [event.category], // Use category as tag
-        createdAt: event.createdAt,
-        updatedAt: event.updatedAt
-      }));
-      
-      setAllEvents(transformedEvents);
-    } catch (err) {
-      console.error('Error fetching events:', err);
-      setError(err.message);
-      toast.error('Failed to load events');
-    } finally {
-      setLoading(false);
-    }
-  };
+ // ...existing code...
 
+// Fetch events from MongoDB
+const fetchEvents = async () => {
+  try {
+    setLoading(true);
+    console.log('Fetching events from backend...');
+    
+    const response = await fetch('http://localhost:5000/api/events');
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch events');
+    }
+    
+    const data = await response.json();
+    console.log('Fetched events:', data);
+    
+    // Fix: Extract events array from response
+    const eventsData = data.events || data; // Handle both response formats
+    
+    // Transform MongoDB data to match your existing component structure
+    const transformedEvents = eventsData.map(event => ({
+      id: event._id,
+      title: event.title,
+      description: event.description,
+      date: new Date(event.date).toISOString().split('T')[0], // Format: YYYY-MM-DD
+      time: new Date(event.date).toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      }),
+      venue: event.venue,
+      category: event.category,
+      image: event.image || '',
+      author: event.author,
+      authorId: event.authorId,
+      registrationCount: event.registrationCount || 0,
+      status: event.status,
+      // Add default values for existing component compatibility
+      format: 'In-Person', // Default value
+      price: 'Free', // Default value
+      department: 'General', // Default value
+      tags: [event.category], // Use category as tag
+      createdAt: event.createdAt,
+      updatedAt: event.updatedAt
+    }));
+    
+    setAllEvents(transformedEvents);
+  } catch (err) {
+    console.error('Error fetching events:', err);
+    setError(err.message);
+    toast.error('Failed to load events');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ...existing code...
   // Register for event
   const handleRegister = async (eventId) => {
     try {
