@@ -111,8 +111,8 @@ const EventDetails = () => {
 
             // Transform the data to match expected format
             const transformedEvent = {
-              _id: eventData._id, // Keep _id for backend compatibility
-              id: eventData._id,
+              _id: eventData._id || eventData.id, // Use _id if available, fallback to id
+              id: eventData._id || eventData.id,
               title: eventData.title,
               description: eventData.description,
               date: eventData.date, // Keep original date format for backend
@@ -124,7 +124,7 @@ const EventDetails = () => {
                   hour12: true,
                 }),
               venue: eventData.venue,
-              type: eventData.type, // Add type for registration modal
+              type: eventData.type || eventData.category, // Add fallback
               category: eventData.category || eventData.type,
               image: eventData.image || eventData.imageUrl || "",
               author: eventData.author,
@@ -138,6 +138,20 @@ const EventDetails = () => {
               status: eventData.status,
               additionalDocumentInfo: eventData.additionalDocumentInfo,
             };
+
+            // Add this debug logging and validation after the transformedEvent creation:
+            console.log("Raw eventData from backend:", eventData);
+            console.log("Transformed event:", transformedEvent);
+            console.log("Event _id:", transformedEvent._id);
+
+            // Validate that _id exists
+            if (!transformedEvent._id) {
+              console.error(
+                "CRITICAL: Event _id is missing after transformation"
+              );
+              toast.error("Event ID is missing. Please refresh the page.");
+              return;
+            }
 
             setEvent(transformedEvent);
             setRegistrationCount(transformedEvent.registrationCount);
@@ -255,19 +269,37 @@ const EventDetails = () => {
   const handleRegisterClick = () => {
     const userId = localStorage.getItem("userId");
 
-    // Since auth0 is handling authentication, if we're here, user should be logged in
     if (!userId) {
       toast.error("Authentication error. Please refresh and try again.");
       return;
     }
 
-    // If we're still loading user data, wait
+    // UPDATED EVENT VALIDATION - check for both _id and id:
+    const eventId = event?._id || event?.id;
+    if (!event || !eventId) {
+      console.error("Event validation failed:", {
+        eventExists: !!event,
+        eventId: eventId,
+        event_id: event?._id,
+        eventIdField: event?.id,
+        fullEvent: event,
+      });
+      toast.error(
+        "Event data is not loaded properly. Please refresh the page."
+      );
+      return;
+    }
+
+    console.log("Opening registration modal with event:", {
+      id: eventId,
+      title: event.title,
+    });
+
     if (isLoadingUser) {
       toast.info("Loading user data...");
       return;
     }
 
-    // Always open the registration modal - it will handle profile completion
     setIsRegistrationModalOpen(true);
   };
 

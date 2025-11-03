@@ -25,6 +25,11 @@ import {
 } from "react-icons/fa";
 
 const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
+  useEffect(() => {
+    console.log("RegistrationModal received event prop:", event);
+    console.log("Event _id:", event?._id);
+    console.log("Event keys:", event ? Object.keys(event) : "No event");
+  }, [event]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showProfileChecker, setShowProfileChecker] = useState(false);
@@ -37,10 +42,10 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
 
   // Add state for editable user info
   const [editableUserInfo, setEditableUserInfo] = useState({
-    name: '',
-    phone: '',
-    department: '',
-    year: ''
+    name: "",
+    phone: "",
+    department: "",
+    year: "",
   });
 
   // Add state to track if we're in edit mode
@@ -50,18 +55,18 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
   useEffect(() => {
     if (user) {
       setEditableUserInfo({
-        name: user.name || '',
-        phone: user.phone || '',
-        department: user.department || '',
-        year: user.year || ''
+        name: user.name || "",
+        phone: user.phone || "",
+        department: user.department || "",
+        year: user.year || "",
       });
-      
+
       // Check if profile needs completion
-      const requiredFields = ['name', 'phone', 'department', 'year'];
-      const incompleteFields = requiredFields.filter(field => 
-        !user[field] || user[field].toString().trim().length === 0
+      const requiredFields = ["name", "phone", "department", "year"];
+      const incompleteFields = requiredFields.filter(
+        (field) => !user[field] || user[field].toString().trim().length === 0
       );
-      
+
       if (incompleteFields.length > 0) {
         setIsEditingProfile(true);
       }
@@ -97,9 +102,9 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
   // Update the checkProfileCompletion function
   const checkProfileCompletion = () => {
     if (!editableUserInfo) return false;
-    
-    const requiredFields = ['name', 'phone', 'department', 'year'];
-    return requiredFields.every(field => {
+
+    const requiredFields = ["name", "phone", "department", "year"];
+    return requiredFields.every((field) => {
       const value = editableUserInfo[field];
       return value && value.toString().trim().length > 0;
     });
@@ -107,35 +112,38 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
 
   // Add handler for user info changes
   const handleUserInfoChange = (field, value) => {
-    setEditableUserInfo(prev => ({
+    setEditableUserInfo((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   // Add function to save user profile
   const saveUserProfile = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${user._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editableUserInfo),
-      });
+      const response = await fetch(
+        `http://localhost:5000/api/users/${user._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editableUserInfo),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        toast.success('Profile updated successfully!');
+        toast.success("Profile updated successfully!");
         setIsEditingProfile(false);
         return true;
       } else {
-        toast.error('Failed to update profile');
+        toast.error("Failed to update profile");
         return false;
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
       return false;
     }
   };
@@ -218,13 +226,26 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
   const handleRegister = async () => {
     // Check if user exists first
     if (!user) {
-      toast.error('User information is not available. Please refresh and try again.');
+      toast.error(
+        "User information is not available. Please refresh and try again."
+      );
       return;
     }
 
+    // IMPORTANT: Check if event and event._id exist
+    const eventId = event?._id || event?.id;
+
+    if (!eventId) {
+      console.error("No event ID available");
+      toast.error("Event ID not found. Please refresh the page.");
+      return;
+    }
+
+    console.log("Using Event ID:", eventId);
+
     // Check profile completion
     if (!checkProfileCompletion()) {
-      toast.error('Please complete all required fields before registering.');
+      toast.error("Please complete all required fields before registering.");
       setIsEditingProfile(true);
       return;
     }
@@ -237,38 +258,52 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
 
     // Validate required ID image
     if (!idImage) {
-      toast.error('Please upload your ID image. This is required for registration.');
+      toast.error(
+        "Please upload your ID image. This is required for registration."
+      );
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const userId = localStorage.getItem('userId');
-      
+      const userId = localStorage.getItem("userId");
+
       if (!userId) {
-        toast.error('User not found. Please log in again.');
+        toast.error("User not found. Please log in again.");
         return;
       }
 
       const formData = new FormData();
-      formData.append('userId', userId);
-      formData.append('idImage', idImage);
-      
+      formData.append("userId", userId);
+      formData.append("idImage", idImage);
+
       if (pdfFile) {
-        formData.append('additionalDocument', pdfFile);
+        formData.append("additionalDocument", pdfFile);
       }
 
-      const response = await fetch(`http://localhost:5000/api/events/${event._id}/register`, {
-        method: 'POST',
-        body: formData,
-      });
+      console.log("Sending registration data:");
+      console.log("Event ID:", eventId);
+      console.log("User ID:", userId);
+      console.log("ID Image:", idImage?.name);
+      console.log("PDF File:", pdfFile?.name);
+
+      const response = await fetch(
+        `http://localhost:5000/api/events/${eventId}/register`, // Make sure this matches your route
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
+      console.log("Registration response status:", response.status);
+      console.log("Registration response data:", data);
+
       if (response.ok) {
         setIsSuccess(true);
-        toast.success('Successfully registered for the event! 🎉');
-        
+        toast.success("Successfully registered for the event! 🎉");
+
         if (onSubmit) {
           onSubmit(data);
         }
@@ -277,12 +312,14 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
           handleClose();
         }, 3000);
       } else {
-        const errorMessage = data.message || 'Registration failed';
+        const errorMessage = data.message || "Registration failed";
+        console.error("Registration failed:", errorMessage);
+        console.error("Full error response:", data);
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      toast.error('Network error. Please try again.');
+      console.error("Registration error:", error);
+      toast.error("Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -422,9 +459,12 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                   <div className={styles.profileEditSection}>
                     <div className={styles.profileEditHeader}>
                       <h4>Complete Your Profile</h4>
-                      <p>Please provide the following information to continue with registration</p>
+                      <p>
+                        Please provide the following information to continue
+                        with registration
+                      </p>
                     </div>
-                    
+
                     <div className={styles.profileFields}>
                       <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
@@ -434,12 +474,14 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         <input
                           type="text"
                           value={editableUserInfo.name}
-                          onChange={(e) => handleUserInfoChange('name', e.target.value)}
+                          onChange={(e) =>
+                            handleUserInfoChange("name", e.target.value)
+                          }
                           placeholder="Enter your full name"
                           className={styles.fieldInput}
                         />
                       </div>
-                      
+
                       <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
                           <FaPhone className={styles.fieldIcon} />
@@ -448,12 +490,14 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         <input
                           type="tel"
                           value={editableUserInfo.phone}
-                          onChange={(e) => handleUserInfoChange('phone', e.target.value)}
+                          onChange={(e) =>
+                            handleUserInfoChange("phone", e.target.value)
+                          }
                           placeholder="Enter your phone number"
                           className={styles.fieldInput}
                         />
                       </div>
-                      
+
                       <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
                           <FaGraduationCap className={styles.fieldIcon} />
@@ -461,12 +505,18 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         </label>
                         <select
                           value={editableUserInfo.department}
-                          onChange={(e) => handleUserInfoChange('department', e.target.value)}
+                          onChange={(e) =>
+                            handleUserInfoChange("department", e.target.value)
+                          }
                           className={styles.fieldSelect}
                         >
                           <option value="">Select Department</option>
-                          <option value="Computer Science">Computer Science</option>
-                          <option value="Information Technology">Information Technology</option>
+                          <option value="Computer Science">
+                            Computer Science
+                          </option>
+                          <option value="Information Technology">
+                            Information Technology
+                          </option>
                           <option value="Electronics">Electronics</option>
                           <option value="Mechanical">Mechanical</option>
                           <option value="Civil">Civil</option>
@@ -474,7 +524,7 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                           <option value="Other">Other</option>
                         </select>
                       </div>
-                      
+
                       <div className={styles.fieldGroup}>
                         <label className={styles.fieldLabel}>
                           <FaGraduationCap className={styles.fieldIcon} />
@@ -482,7 +532,9 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         </label>
                         <select
                           value={editableUserInfo.year}
-                          onChange={(e) => handleUserInfoChange('year', e.target.value)}
+                          onChange={(e) =>
+                            handleUserInfoChange("year", e.target.value)
+                          }
                           className={styles.fieldSelect}
                         >
                           <option value="">Select Year</option>
@@ -494,7 +546,7 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         </select>
                       </div>
                     </div>
-                    
+
                     <div className={styles.profileEditActions}>
                       <button
                         type="button"
@@ -522,7 +574,9 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         <div>
                           <span className={styles.infoLabel}>Full Name</span>
                           <span className={styles.infoValue}>
-                            {editableUserInfo?.name || user?.name || "Not provided"}
+                            {editableUserInfo?.name ||
+                              user?.name ||
+                              "Not provided"}
                           </span>
                         </div>
                       </div>
@@ -530,8 +584,12 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                       <div className={styles.sharedInfoItem}>
                         <FaEnvelope className={styles.sharedIcon} />
                         <div>
-                          <span className={styles.infoLabel}>Email Address</span>
-                          <span className={styles.infoValue}>{user?.email}</span>
+                          <span className={styles.infoLabel}>
+                            Email Address
+                          </span>
+                          <span className={styles.infoValue}>
+                            {user?.email}
+                          </span>
                         </div>
                       </div>
 
@@ -540,7 +598,9 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         <div>
                           <span className={styles.infoLabel}>Phone Number</span>
                           <span className={styles.infoValue}>
-                            {editableUserInfo?.phone || user?.phone || "Not specified"}
+                            {editableUserInfo?.phone ||
+                              user?.phone ||
+                              "Not specified"}
                           </span>
                         </div>
                       </div>
@@ -552,8 +612,13 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                             Department & Year
                           </span>
                           <span className={styles.infoValue}>
-                            {(editableUserInfo?.department || user?.department) && (editableUserInfo?.year || user?.year)
-                              ? `${editableUserInfo?.department || user?.department} - ${editableUserInfo?.year || user?.year}`
+                            {(editableUserInfo?.department ||
+                              user?.department) &&
+                            (editableUserInfo?.year || user?.year)
+                              ? `${
+                                  editableUserInfo?.department ||
+                                  user?.department
+                                } - ${editableUserInfo?.year || user?.year}`
                               : "Not specified"}
                           </span>
                         </div>
@@ -584,7 +649,8 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                         <span className={styles.required}>*</span>
                       </label>
                       <p className={styles.uploadDescription}>
-                        Upload a clear photo of your student ID card (front side)
+                        Upload a clear photo of your student ID card (front
+                        side)
                       </p>
 
                       {!idImage ? (
@@ -664,7 +730,9 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
                             <FaUpload />
                             Choose PDF Document
                           </label>
-                          <p className={styles.uploadHint}>PDF only (Max 5MB)</p>
+                          <p className={styles.uploadHint}>
+                            PDF only (Max 5MB)
+                          </p>
                         </div>
                       ) : (
                         <div className={styles.uploadedFile}>

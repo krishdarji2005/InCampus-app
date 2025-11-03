@@ -13,6 +13,8 @@ import CreateEvent from "./pages/CreateEvent";
 import Profile from "./pages/Profile";
 
 import OnboardingFlow from "./components/OnboardingFlow/OnboardingFlow";
+import Dashboard from "./pages/Dashboard";
+import EditEvent from "./pages/EditEvent"
 const router = createBrowserRouter([
   {
     path: "/",
@@ -45,6 +47,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+            {
+        path: "/events/:id/edit", 
+        element: (
+          <ProtectedRoute>
+            <EditEvent />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "/committees",
         element: (
@@ -74,6 +84,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <OnboardingFlow />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/dashboard",
+        element: (
+          <ProtectedRoute>
+            <Dashboard />
           </ProtectedRoute>
         ),
       },

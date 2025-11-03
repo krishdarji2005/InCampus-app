@@ -13,7 +13,7 @@ import { MdPeople } from "react-icons/md";
 const EventCard = React.memo(function EventCard({ event }) {
   const navigate = useNavigate();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  
+
   const handleClick = () => {
     navigate(`/events/${event.id}`, { state: { event } });
   };
@@ -25,20 +25,22 @@ const EventCard = React.memo(function EventCard({ event }) {
 
   const handleAddToCalendar = (e) => {
     e.stopPropagation();
-    
+
     // Combine date and time for proper calendar entry
-    const eventDateTime = new Date(`${event.date}T${convertTimeTo24Hour(event.time)}`);
+    const eventDateTime = new Date(
+      `${event.date}T${convertTimeTo24Hour(event.time)}`
+    );
     const endDateTime = new Date(eventDateTime.getTime() + 2 * 60 * 60 * 1000); // 2 hours duration
-    
+
     // Create .ics file content
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//InCampus//Event Calendar//EN
 BEGIN:VEVENT
 UID:${event.id}@incampus.com
-DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTSTART:${eventDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
-DTEND:${endDateTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z
+DTSTART:${eventDateTime.toISOString().replace(/[-:]/g, "").split(".")[0]}Z
+DTEND:${endDateTime.toISOString().replace(/[-:]/g, "").split(".")[0]}Z
 SUMMARY:${event.title}
 DESCRIPTION:${event.description || event.title}
 LOCATION:${event.venue}
@@ -46,11 +48,13 @@ END:VEVENT
 END:VCALENDAR`;
 
     // Download the .ics file
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const blob = new Blob([icsContent], { type: "text/calendar" });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    link.download = `${event.title
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -59,71 +63,93 @@ END:VCALENDAR`;
 
   // Helper function to convert 12-hour time to 24-hour format
   const convertTimeTo24Hour = (time12h) => {
-    const [time, modifier] = time12h.split(' ');
-    let [hours, minutes] = time.split(':');
-    if (hours === '12') {
-      hours = '00';
+    const [time, modifier] = time12h.split(" ");
+    let [hours, minutes] = time.split(":");
+    if (hours === "12") {
+      hours = "00";
     }
-    if (modifier === 'PM') {
+    if (modifier === "PM") {
       hours = parseInt(hours, 10) + 12;
     }
-    return `${hours.padStart(2, '0')}:${minutes}:00`;
+    return `${hours.padStart(2, "0")}:${minutes}:00`;
   };
 
   const getFormatIcon = () => {
     switch (event.format) {
-      case 'Virtual':
-        return '💻';
-      case 'Hybrid':
-        return '🔄';
+      case "Virtual":
+        return "💻";
+      case "Hybrid":
+        return "🔄";
       default:
-        return '📍';
+        return "📍";
     }
   };
 
   const getCategoryColor = () => {
     switch (event.category) {
-      case 'Technical':
-        return '#3b82f6';
-      case 'Cultural':
-        return '#10b981';
-      case 'Sports':
-        return '#ef4444';
-      case 'Academic':
-        return '#8b5cf6';
-      case 'Workshop':
-        return '#f59e0b';
-      case 'Seminar':
-        return '#06b6d4';
-      case 'Competition':
-        return '#ec4899';
-      case 'Social':
-        return '#84cc16';
-      case 'Art & Craft':
-        return '#f97316';
-      case 'Music':
-        return '#a855f7';
-      case 'Dance':
-        return '#e11d48';
-      case 'Literature':
-        return '#059669';
+      case "Technical":
+        return "#3b82f6";
+      case "Cultural":
+        return "#10b981";
+      case "Sports":
+        return "#ef4444";
+      case "Academic":
+        return "#8b5cf6";
+      case "Workshop":
+        return "#f59e0b";
+      case "Seminar":
+        return "#06b6d4";
+      case "Competition":
+        return "#ec4899";
+      case "Social":
+        return "#84cc16";
+      case "Art & Craft":
+        return "#f97316";
+      case "Music":
+        return "#a855f7";
+      case "Dance":
+        return "#e11d48";
+      case "Literature":
+        return "#059669";
       default:
-        return '#6b7280';
+        return "#6b7280";
     }
   };
 
   // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
+const formatEventDate = (dateString) => {
+  try {
+    if (!dateString) return 'Date TBD';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return 'Date TBD';
+    }
+    return date.toLocaleDateString();
+  } catch (error) {
+    console.warn('Invalid date format:', dateString);
+    return 'Date TBD';
+  }
+};
+
+// Use it in your EventCard:
+<span>{formatEventDate(event.date)}</span>
+
   return (
-    <article className={styles.card} onClick={handleClick} role="button" tabIndex={0}>
+    <article
+      className={styles.card}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+    >
       <div className={styles.imageWrapper}>
         <LazyLoadImage
           src={event.image || CardImage}
@@ -143,7 +169,7 @@ END:VCALENDAR`;
       </div>
       <div className={styles.details}>
         <div className={styles.meta}>
-          <time dateTime={new Date(event.date).toISOString()}>
+          <time dateTime={formatEventDate(event.date)}>
             {formatDate(event.date)}
           </time>
           <span className={styles.dot}>•</span>
@@ -151,33 +177,39 @@ END:VCALENDAR`;
           <span className={styles.dot}>•</span>
           <span className={styles.price}>{event.price}</span>
         </div>
-        
+
         <h3 className={styles.title}>{event.title}</h3>
-        
+
         <p className={styles.description}>
           {event.description && event.description.length > 100
             ? `${event.description.substring(0, 100)}...`
-            : event.description
-          }
+            : event.description}
         </p>
-        
+
         <div className={styles.location}>
-          <span className={styles.locationIcon}><GrMapLocation/></span>
+          <span className={styles.locationIcon}>
+            <GrMapLocation />
+          </span>
           <span>{event.venue}</span>
         </div>
-        
+
         <div className={styles.category}>
-          <span 
+          <span
             className={styles.categoryTag}
             style={{ backgroundColor: getCategoryColor() }}
           >
             {event.category}
           </span>
         </div>
-        
+
         <div className={styles.author}>
           <img
-            src={event.authorImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(event.author)}&background=8b5cf6&color=fff`}
+            src={
+              event.authorImage ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                event.author
+              )}&background=8b5cf6&color=fff`
+            }
             alt={event.author}
             className={styles.avatar}
             width={20}
@@ -191,26 +223,28 @@ END:VCALENDAR`;
           <MdPeople className={styles.peopleIcon} />
           <span>{event.registrationCount || 0} registered</span>
         </div>
-        
+
         <div className={styles.actions}>
-          <button 
-            className={`${styles.actionButton} ${isBookmarked ? styles.bookmarked : ''}`}
+          <button
+            className={`${styles.actionButton} ${
+              isBookmarked ? styles.bookmarked : ""
+            }`}
             onClick={handleBookmark}
-            title={isBookmarked ? 'Remove from bookmarks' : 'Add to bookmarks'}
+            title={isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"}
           >
             {isBookmarked ? <IoBookmark /> : <IoBookmarkOutline />}
           </button>
-          
-          <button 
+
+          <button
             className={styles.actionButton}
             onClick={handleAddToCalendar}
             title="Add to calendar"
           >
             <TbCalendarPlus />
           </button>
-          
+
           {/* View Details button instead of Register */}
-          <button 
+          <button
             className={styles.viewDetailsButton}
             onClick={handleClick}
             title="View event details"

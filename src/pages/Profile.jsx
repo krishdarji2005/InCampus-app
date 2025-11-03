@@ -1,3 +1,4 @@
+// src/pages/Profile.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -20,6 +21,12 @@ import {
   FaUserTie,
   FaCog,
   FaBell,
+  FaEye,
+  FaDownload,
+  FaTrash,
+  FaPlus,
+  FaUsers,
+  FaChartLine,
 } from "react-icons/fa";
 import EditProfile from "../components/EditProfile/EditProfile";
 
@@ -32,12 +39,16 @@ const Profile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [user, setUser] = useState(null);
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [hostedEvents, setHostedEvents] = useState([]); // New state for hosted events
+  const [activeTab, setActiveTab] = useState("registered"); // New state for tab switching
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [serverStatus, setServerStatus] = useState("checking");
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [hostedEventsLoading, setHostedEventsLoading] = useState(false); // New loading state
   const navigate = useNavigate();
 
-  // Check if backend server is running
+  // Existing functions remain the same...
   const checkServerStatus = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/health", {
@@ -61,7 +72,6 @@ const Profile = () => {
     }
   };
 
-  // Get current user data from Auth0 and localStorage
   const getCurrentUser = () => {
     if (auth0User) {
       return auth0User;
@@ -76,7 +86,6 @@ const Profile = () => {
     }
   };
 
-  // Create or get user from backend
   const createOrGetUserInBackend = async (authUser) => {
     try {
       console.log("Looking for user with email:", authUser.email);
@@ -107,6 +116,34 @@ const Profile = () => {
 
       console.log("User not found, creating new user...");
 
+      // Enhanced user data extraction for creation
+      const extractName = (authUser) => {
+        if (authUser.name && authUser.name !== authUser.email) {
+          return authUser.name;
+        }
+        if (authUser.nickname && authUser.nickname !== authUser.email) {
+          return authUser.nickname;
+        }
+        if (authUser.given_name && authUser.family_name) {
+          return `${authUser.given_name} ${authUser.family_name}`;
+        }
+        if (authUser.given_name) {
+          return authUser.given_name;
+        }
+        // Fallback to email username
+        return authUser.email.split("@")[0];
+      };
+
+      const extractProfilePic = (authUser) => {
+        if (authUser.picture && authUser.picture !== "") {
+          return authUser.picture;
+        }
+        if (authUser.user_metadata && authUser.user_metadata.picture) {
+          return authUser.user_metadata.picture;
+        }
+        return ""; // Empty string for no picture
+      };
+
       const createResponse = await fetch(
         "http://localhost:5000/api/users/google-auth",
         {
@@ -116,10 +153,16 @@ const Profile = () => {
             Accept: "application/json",
           },
           body: JSON.stringify({
-            name: authUser.name || authUser.given_name || "New User",
+            name: extractName(authUser),
             email: authUser.email,
-            profilePic: authUser.picture || "",
+            profilePic: extractProfilePic(authUser),
             googleId: authUser.sub,
+            // Add additional metadata
+            auth0_user_id: authUser.sub,
+            connection: authUser.sub.includes("google")
+              ? "google-oauth2"
+              : "Username-Password-Authentication",
+            email_verified: authUser.email_verified || false,
           }),
         }
       );
@@ -142,6 +185,71 @@ const Profile = () => {
     } catch (error) {
       console.error("Error creating/getting user in backend:", error);
       throw error;
+    }
+  };
+
+  const fetchUserRegisteredEvents = async (userId) => {
+    try {
+      setEventsLoading(true);
+      console.log("Fetching registered events for user:", userId);
+
+      const response = await fetch(
+        `http://localhost:5000/api/users/${userId}/events`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched registered events:", data);
+        return data.events || [];
+      } else {
+        console.log("No registered events found or error fetching");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching registered events:", error);
+      return [];
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  // NEW: Fetch hosted events function
+  const fetchUserHostedEvents = async (userId) => {
+    try {
+      setHostedEventsLoading(true);
+      console.log("Fetching hosted events for user:", userId);
+
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/organizer/${userId}/events?limit=50`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched hosted events:", data);
+        return data.events || [];
+      } else {
+        console.log("No hosted events found or error fetching");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching hosted events:", error);
+      return [];
+    } finally {
+      setHostedEventsLoading(false);
     }
   };
 
@@ -189,7 +297,15 @@ const Profile = () => {
       localStorage.setItem("userId", backendUser._id);
 
       setUser(backendUser);
-      setRegisteredEvents(backendUser.registeredEvents || []);
+
+      // Fetch both registered and hosted events
+      const [userEvents, hostEvents] = await Promise.all([
+        fetchUserRegisteredEvents(backendUser._id),
+        fetchUserHostedEvents(backendUser._id),
+      ]);
+
+      setRegisteredEvents(userEvents);
+      setHostedEvents(hostEvents);
     } catch (err) {
       console.error("Error fetching profile:", err);
 
@@ -256,6 +372,76 @@ const Profile = () => {
     }
   };
 
+  // NEW: Handle hosted event actions
+  const handleExportRegistrations = async (eventId, eventTitle) => {
+    try {
+      toast.info("Preparing download...");
+
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/events/${eventId}/export`
+      );
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${eventTitle.replace(
+          /[^a-zA-Z0-9]/g,
+          "_"
+        )}_registrations.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast.success("Registration data downloaded successfully!");
+      } else {
+        toast.error("Failed to export data");
+      }
+    } catch (error) {
+      console.error("Error exporting registrations:", error);
+      toast.error("Export failed. Please try again.");
+    }
+  };
+
+  const handleDeleteHostedEvent = async (eventId, eventTitle) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${eventTitle}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const organizerId = localStorage.getItem("userId");
+      const response = await fetch(
+        `http://localhost:5000/api/dashboard/events/${eventId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ organizerId }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Event deleted successfully");
+        setHostedEvents((prev) =>
+          prev.filter((event) => event._id !== eventId)
+        );
+      } else {
+        toast.error(data.message || "Failed to delete event");
+      }
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast.error("Failed to delete event");
+    }
+  };
+
   const getProfileCompletionPercentage = () => {
     if (!user) return 0;
 
@@ -289,19 +475,19 @@ const Profile = () => {
     return percentage;
   };
 
-  // FIXED: Proper profile update handler
   const handleProfileUpdate = (updatedUser) => {
     console.log("Profile updated:", updatedUser);
     setUser(updatedUser);
     localStorage.setItem("userId", updatedUser._id);
 
-    // Trigger re-render by forcing state update
     setTimeout(() => {
       const newCompletionPercentage = getProfileCompletionPercentage();
       console.log("New completion percentage:", newCompletionPercentage);
 
-      // Check if profile should be marked as completed
-      if (newCompletionPercentage === 100 && !updatedUser.isOnboardingComplete) {
+      if (
+        newCompletionPercentage === 100 &&
+        !updatedUser.isOnboardingComplete
+      ) {
         updateOnboardingStatus(updatedUser._id);
       }
     }, 100);
@@ -366,7 +552,86 @@ const Profile = () => {
     );
   };
 
-  // Loading States
+  // NEW: Render hosted event cards with management actions
+  const renderHostedEventCard = (event) => (
+    <div key={event._id} className={styles.hostedEventCard}>
+      <div className={styles.hostedEventHeader}>
+        <div className={styles.eventTitle}>
+          <h4>{event.title}</h4>
+          <span className={styles.eventCategory}>{event.category}</span>
+        </div>
+        <span className={`${styles.eventStatus} ${styles[event.status]}`}>
+          {event.status}
+        </span>
+      </div>
+
+      <div className={styles.eventDetails}>
+        <div className={styles.eventMeta}>
+          <span>
+            <FaCalendarAlt /> {new Date(event.date).toLocaleDateString()}
+          </span>
+          <span>
+            <FaMapMarkerAlt /> {event.venue}
+          </span>
+        </div>
+
+        <div className={styles.eventStats}>
+          <div className={styles.stat}>
+            <FaUsers />
+            <span>
+              {event.registrationCount}/{event.maxParticipants}
+            </span>
+          </div>
+          <div className={styles.registrationProgress}>
+            <div className={styles.progressBar}>
+              <div
+                className={styles.progressFill}
+                style={{
+                  width: `${Math.min(
+                    (event.registrationCount / event.maxParticipants) * 100,
+                    100
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.eventActions}>
+        <button
+          className={styles.actionBtn}
+          onClick={() => navigate(`/events/${event._id}`)}
+          title="View Event"
+        >
+          <FaEye />
+        </button>
+        <button
+          className={styles.actionBtn}
+          onClick={() => handleExportRegistrations(event._id, event.title)}
+          title="Export Registrations"
+        >
+          <FaDownload />
+        </button>
+        <button
+          className={styles.actionBtn}
+          onClick={() => navigate(`/events/${event._id}/edit`)}
+          title="Edit Event"
+        >
+          <FaEdit />
+        </button>
+        <button
+          className={styles.actionBtn}
+          onClick={() => handleDeleteHostedEvent(event._id, event.title)}
+          title="Delete Event"
+        >
+          <FaTrash />
+        </button>
+      </div>
+    </div>
+  );
+
+  // All existing loading and error states remain the same...
   if (authLoading || (loading && !error)) {
     return (
       <div className={styles.container}>
@@ -458,7 +723,7 @@ const Profile = () => {
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        {/* Profile Header */}
+        {/* Existing Profile Header stays the same */}
         <div className={styles.profileHeader}>
           <div className={styles.profileHero}>
             <div className={styles.profileImageContainer}>
@@ -492,63 +757,17 @@ const Profile = () => {
               >
                 <FaEdit /> Edit Profile
               </button>
-              <button className={styles.settingsButton}>
-                <FaCog />
+              <button
+                className={styles.settingsButton}
+                onClick={() => navigate("/dashboard")}
+                title="View Dashboard"
+              >
+                <FaChartLine />
               </button>
             </div>
           </div>
 
-          {/* Debug - Remove this after testing
-          {process.env.NODE_ENV === "development" && (
-            <div
-              style={{
-                background: "#333",
-                padding: "1rem",
-                margin: "1rem 0",
-                borderRadius: "8px",
-              }}
-            >
-              <h4>Debug - Profile Completion</h4>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                  gap: "0.5rem",
-                }}
-              >
-                <div>
-                  Name: {user.name ? "✅" : "❌"} ({user.name})
-                </div>
-                <div>
-                  Email: {user.email ? "✅" : "❌"} ({user.email})
-                </div>
-                <div>
-                  Department: {user.department ? "✅" : "❌"} ({user.department})
-                </div>
-                <div>
-                  Year: {user.year ? "✅" : "❌"} ({user.year})
-                </div>
-                <div>
-                  Phone: {user.phone ? "✅" : "❌"} ({user.phone})
-                </div>
-                <div>
-                  Bio: {user.bio ? "✅" : "❌"} ({user.bio?.substring(0, 20)}...)
-                </div>
-                <div>
-                  Roll Number: {user.rollNumber ? "✅" : "❌"} ({user.rollNumber})
-                </div>
-                <div>
-                  Interests: {user.interests?.length > 0 ? "✅" : "❌"} (
-                  {user.interests?.length} items)
-                </div>
-              </div>
-              <div style={{ marginTop: "0.5rem", fontWeight: "bold" }}>
-                Completion: {completionPercentage}%
-              </div>
-            </div>
-          )} */}
-
-          {/* Profile Completion Status */}
+          {/* Profile completion banner stays the same */}
           {!user.isOnboardingComplete && (
             <div className={styles.completionBanner}>
               <div className={styles.bannerContent}>
@@ -574,7 +793,10 @@ const Profile = () => {
                 <button
                   className={styles.completeButton}
                   onClick={() => {
-                    console.log("Navigating to onboarding with userId:", user._id);
+                    console.log(
+                      "Navigating to onboarding with userId:",
+                      user._id
+                    );
                     localStorage.setItem("userId", user._id);
                     navigate("/onboarding");
                   }}
@@ -590,7 +812,7 @@ const Profile = () => {
         <div className={styles.mainContent}>
           {/* Left Column */}
           <div className={styles.leftColumn}>
-            {/* Personal Information */}
+            {/* Personal Information section stays the same */}
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>
                 <FaUser className={styles.sectionIcon} />
@@ -611,7 +833,9 @@ const Profile = () => {
                     <span className={styles.infoLabel}>Phone</span>
                     <span className={styles.infoValue}>
                       {user.phone || (
-                        <span className={styles.notSpecified}>Not specified</span>
+                        <span className={styles.notSpecified}>
+                          Not specified
+                        </span>
                       )}
                     </span>
                   </div>
@@ -633,7 +857,9 @@ const Profile = () => {
                     <span className={styles.infoLabel}>Department</span>
                     <span className={styles.infoValue}>
                       {user.department || (
-                        <span className={styles.notSpecified}>Not specified</span>
+                        <span className={styles.notSpecified}>
+                          Not specified
+                        </span>
                       )}
                     </span>
                   </div>
@@ -645,7 +871,9 @@ const Profile = () => {
                     <span className={styles.infoLabel}>Academic Year</span>
                     <span className={styles.infoValue}>
                       {user.year || (
-                        <span className={styles.notSpecified}>Not specified</span>
+                        <span className={styles.notSpecified}>
+                          Not specified
+                        </span>
                       )}
                     </span>
                   </div>
@@ -657,7 +885,9 @@ const Profile = () => {
                     <span className={styles.infoLabel}>Roll Number</span>
                     <span className={styles.infoValue}>
                       {user.rollNumber || (
-                        <span className={styles.notSpecified}>Not specified</span>
+                        <span className={styles.notSpecified}>
+                          Not specified
+                        </span>
                       )}
                     </span>
                   </div>
@@ -685,49 +915,184 @@ const Profile = () => {
               )}
             </div>
 
-            {/* Registered Events */}
+            {/* NEW: Enhanced Events Section with Tabs */}
             <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>
-                <FaCalendarAlt className={styles.sectionIcon} />
-                My Events ({registeredEvents.length})
-              </h2>
+              <div className={styles.eventsHeader}>
+                <h2 className={styles.sectionTitle}>
+                  <FaCalendarAlt className={styles.sectionIcon} />
+                  My Events
+                </h2>
+                <button
+                  className={styles.createEventBtn}
+                  onClick={() => navigate("/create-event")}
+                >
+                  <FaPlus /> Create Event
+                </button>
+              </div>
 
-              {registeredEvents.length === 0 ? (
-                <div className={styles.noEvents}>
-                  <div className={styles.noEventsIcon}>
-                    <FaCalendarAlt />
+              {/* Tab Navigation */}
+              <div className={styles.tabNavigation}>
+                <button
+                  className={`${styles.tabButton} ${
+                    activeTab === "registered" ? styles.active : ""
+                  }`}
+                  onClick={() => setActiveTab("registered")}
+                >
+                  <FaUsers />
+                  Events I Joined ({registeredEvents.length})
+                </button>
+                <button
+                  className={`${styles.tabButton} ${
+                    activeTab === "hosted" ? styles.active : ""
+                  }`}
+                  onClick={() => setActiveTab("hosted")}
+                >
+                  <FaChartLine />
+                  Events I Created ({hostedEvents.length})
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className={styles.tabContent}>
+                {activeTab === "registered" && (
+                  <div className={styles.registeredEventsTab}>
+                    {eventsLoading ? (
+                      <div className={styles.eventsLoading}>
+                        <div className={styles.loader}></div>
+                        <p>Loading your events...</p>
+                      </div>
+                    ) : registeredEvents.length === 0 ? (
+                      <div className={styles.noEvents}>
+                        <div className={styles.noEventsIcon}>
+                          <FaCalendarAlt />
+                        </div>
+                        <h3>No Events Yet</h3>
+                        <p>
+                          You haven't registered for any events yet. Discover
+                          amazing events happening on campus!
+                        </p>
+                        <button
+                          className={styles.browseEventsButton}
+                          onClick={() => navigate("/events")}
+                        >
+                          Browse Events
+                        </button>
+                      </div>
+                    ) : (
+                      <div className={styles.eventsGrid}>
+                        {registeredEvents.map((event) => (
+                          <div
+                            key={event._id || event.id}
+                            className={styles.eventCardWrapper}
+                          >
+                            <EventCard event={event} />
+                            <button
+                              className={styles.cancelButton}
+                              onClick={() =>
+                                handleCancelRegistration(event._id)
+                              }
+                            >
+                              Cancel Registration
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <h3>No Events Yet</h3>
-                  <p>
-                    You haven't registered for any events yet. Discover amazing
-                    events happening on campus!
-                  </p>
-                  <button
-                    className={styles.browseEventsButton}
-                    onClick={() => navigate("/events")}
-                  >
-                    Browse Events
-                  </button>
-                </div>
-              ) : (
-                <div className={styles.eventsGrid}>
-                  {registeredEvents.map((event) => (
-                    <div key={event._id} className={styles.eventCardWrapper}>
-                      <EventCard event={event} />
+                )}
+
+                {activeTab === "hosted" && (
+                  <div className={styles.hostedEventsTab}>
+                    {/* Add Dashboard Link Header */}
+                    <div className={styles.dashboardLinkSection}>
+                      <div className={styles.dashboardInfo}>
+                        <h4>📊 Event Management Hub</h4>
+                        <p>
+                          Get detailed analytics, export data, and manage all
+                          your events
+                        </p>
+                      </div>
                       <button
-                        className={styles.cancelButton}
-                        onClick={() => handleCancelRegistration(event._id)}
+                        className={styles.dashboardLink}
+                        onClick={() => navigate("/dashboard")}
                       >
-                        Cancel Registration
+                        <FaChartLine />
+                        View Full Dashboard
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    {hostedEventsLoading ? (
+                      <div className={styles.eventsLoading}>
+                        <div className={styles.loader}></div>
+                        <p>Loading your hosted events...</p>
+                      </div>
+                    ) : hostedEvents.length === 0 ? (
+                      <div className={styles.noEvents}>
+                        <div className={styles.noEventsIcon}>
+                          <FaChartLine />
+                        </div>
+                        <h3>No Events Created</h3>
+                        <p>
+                          You haven't created any events yet. Start organizing
+                          and bring people together!
+                        </p>
+                        <div className={styles.noEventsActions}>
+                          <button
+                            className={styles.browseEventsButton}
+                            onClick={() => navigate("/create-event")}
+                          >
+                            <FaPlus /> Create Your First Event
+                          </button>
+                          <button
+                            className={styles.secondaryButton}
+                            onClick={() => navigate("/dashboard")}
+                          >
+                            <FaChartLine /> View Dashboard
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Show recent events with limited actions */}
+                        <div className={styles.recentEventsHeader}>
+                          <h4>
+                            Recent Events ({hostedEvents.slice(0, 3).length} of{" "}
+                            {hostedEvents.length})
+                          </h4>
+                          {hostedEvents.length > 3 && (
+                            <span
+                              className={styles.viewAllLink}
+                              onClick={() => navigate("/dashboard")}
+                            >
+                              View all {hostedEvents.length} events →
+                            </span>
+                          )}
+                        </div>
+
+                        <div className={styles.hostedEventsGrid}>
+                          {hostedEvents.slice(0, 3).map(renderHostedEventCard)}
+                        </div>
+
+                        {hostedEvents.length > 3 && (
+                          <div className={styles.viewMoreSection}>
+                            <button
+                              className={styles.viewMoreButton}
+                              onClick={() => navigate("/dashboard")}
+                            >
+                              <FaChartLine />
+                              View All Events & Analytics
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column stays the same but with updated quick actions */}
           <div className={styles.rightColumn}>
             {/* Profile Status */}
             <div className={styles.card}>
@@ -736,7 +1101,9 @@ const Profile = () => {
                 <div className={styles.statusItem}>
                   <div
                     className={`${styles.statusIcon} ${
-                      user.profileCompleted ? styles.complete : styles.incomplete
+                      user.profileCompleted
+                        ? styles.complete
+                        : styles.incomplete
                     }`}
                   >
                     <FaCheckCircle />
@@ -752,7 +1119,9 @@ const Profile = () => {
                 <div className={styles.statusItem}>
                   <div
                     className={`${styles.statusIcon} ${
-                      user.isOnboardingComplete ? styles.complete : styles.incomplete
+                      user.isOnboardingComplete
+                        ? styles.complete
+                        : styles.incomplete
                     }`}
                   >
                     <FaCheckCircle />
@@ -791,9 +1160,12 @@ const Profile = () => {
                   <FaEdit />
                   <span>Edit Profile</span>
                 </button>
-                <button className={styles.quickActionButton}>
-                  <FaBell />
-                  <span>Notifications</span>
+                <button
+                  className={styles.quickActionButton}
+                  onClick={() => navigate("/dashboard")}
+                >
+                  <FaChartLine />
+                  <span>Dashboard</span>
                 </button>
                 <button
                   className={styles.quickActionButton}
@@ -802,9 +1174,12 @@ const Profile = () => {
                   <FaCalendarAlt />
                   <span>Browse Events</span>
                 </button>
-                <button className={styles.quickActionButton}>
-                  <FaCog />
-                  <span>Settings</span>
+                <button
+                  className={styles.quickActionButton}
+                  onClick={() => navigate("/create-event")}
+                >
+                  <FaPlus />
+                  <span>Create Event</span>
                 </button>
               </div>
             </div>
@@ -828,11 +1203,21 @@ const Profile = () => {
                 </div>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Account Type</span>
-                  <span className={styles.detailValue}>{user.role || "Student"}</span>
+                  <span className={styles.detailValue}>
+                    {user.role || "Student"}
+                  </span>
                 </div>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Events Registered</span>
-                  <span className={styles.detailValue}>{registeredEvents.length}</span>
+                  <span className={styles.detailValue}>
+                    {registeredEvents.length}
+                  </span>
+                </div>
+                <div className={styles.detailItem}>
+                  <span className={styles.detailLabel}>Events Created</span>
+                  <span className={styles.detailValue}>
+                    {hostedEvents.length}
+                  </span>
                 </div>
               </div>
             </div>

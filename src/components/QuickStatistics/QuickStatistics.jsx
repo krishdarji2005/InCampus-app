@@ -22,7 +22,7 @@ function throttle(func, delay) {
   };
 }
 
-const SpotlightCard = ({ children, className = '', spotlightColor = 'rgba(139, 92, 246, 0.3)', title, subtitle, buttonText = "Try it Yourself" }) => {
+const SpotlightCard = ({ children, className = '', spotlightColor = 'rgba(139, 92, 246, 0.3)', title, subtitle }) => {
   const divRef = useRef(null);
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -79,7 +79,7 @@ const SpotlightCard = ({ children, className = '', spotlightColor = 'rgba(139, 9
             <span className={styles.cardBadge}>InCampus</span>
             <h3 className={styles.cardTitle}>{title}</h3>
             <p className={styles.cardSubtitle}>{subtitle}</p>
-            <button className={styles.cardButton}>{buttonText}</button>
+            {/* <button className={styles.cardButton}>{buttonText}</button> */}
           </div>
         )}
         
@@ -191,7 +191,7 @@ const QuickStatistics = () => {
             className={styles.featuresCard}
             title="Streamlined Event Management with InCampus"
             subtitle="From manual paperwork to digital excellence, InCampus transforms how students register for campus events with cutting-edge automation and real-time processing."
-            buttonText="Explore Features"
+            // buttonText="Explore Features"
           >
             <div className={styles.featuresPanel}>
               <div className={styles.featureItem}>
@@ -230,7 +230,7 @@ const QuickStatistics = () => {
             className={styles.analyticsCard}
             title="Real-time Analytics Dashboard"
             subtitle="Monitor registration patterns, track time savings, and visualize the efficiency gains from digital transformation in real-time interactive displays."
-            buttonText="View Analytics"
+            // buttonText="View Analytics"
           >
             <div className={styles.chartPanel}>
               <div className={styles.statsCards}>

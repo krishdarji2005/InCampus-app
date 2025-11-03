@@ -1,10 +1,10 @@
 .bentoSection {
     width: 100%;
     padding: 4rem 0;
-    background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%);
+    /* background: linear-gradient(135deg, #0a0a0a 0%, #000000 100%); */
     position: relative;
     overflow: hidden;
-    background: url("../assets//darkbg.png");
+    /* background: url("../assets//darkbg.png"); */
   
  
         /* background:

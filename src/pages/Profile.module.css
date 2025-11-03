@@ -773,3 +773,366 @@
     padding: 0.75rem;
   }
 }
+/* Add these new styles to your existing Profile.module.css */
+
+/* Events Header */
+.eventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.createEventBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.createEventBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+}
+
+/* Tab Navigation */
+.tabNavigation {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.tabButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.tabButton:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tabButton.active {
+  background: #8b5cf6;
+  color: #ffffff;
+}
+
+/* Tab Content */
+.tabContent {
+  min-height: 200px;
+}
+
+/* Hosted Events Grid */
+.hostedEventsGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.hostedEventCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.hostedEventCard:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(139, 92, 246, 0.3);
+  transform: translateY(-2px);
+}
+
+.hostedEventHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.eventTitle h4 {
+  color: #ffffff;
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.eventCategory {
+  color: #a1a1aa;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  background: rgba(139, 92, 246, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.eventStatus {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.eventStatus.upcoming {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.eventStatus.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.eventStatus.completed {
+  background: rgba(161, 161, 170, 0.2);
+  color: #a1a1aa;
+}
+
+.eventStatus.cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.eventDetails {
+  margin-bottom: 1rem;
+}
+
+.eventMeta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.eventMeta span {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+}
+
+.eventStats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.registrationProgress {
+  flex: 1;
+}
+
+.eventActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.actionBtn:hover {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .eventsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .tabNavigation {
+    flex-direction: column;
+  }
+
+  .eventMeta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .eventStats {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .eventActions {
+    justify-content: center;
+  }
+}
+/* Dashboard Link Section */
+.dashboardLinkSection {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboardInfo h4 {
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dashboardInfo p {
+  color: #a1a1aa;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dashboardLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6600ff3b, #581cc765);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  margin: 8px;
+}
+
+.dashboardLink:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Recent Events Header */
+.recentEventsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #333;
+}
+
+.recentEventsHeader h4 {
+  color: #ffffff;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.viewAllLink {
+  color: #8b5cf6;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.viewAllLink:hover {
+  color: #a78bfa;
+}
+
+/* View More Section */
+.viewMoreSection {
+  margin-top: 1.5rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid #333;
+}
+
+.viewMoreButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.viewMoreButton:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #8b5cf6;
+  color: #8b5cf6;
+}
+
+/* No Events Actions */
+.noEventsActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboardLinkSection {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .recentEventsHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .noEventsActions {
+    flex-direction: column;
+  }
+}

@@ -1,36 +1,61 @@
 .homeContainer {
   position: relative;
-  width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  background-color: #09090B;
+  color: #ffffff;
+  overflow-x: hidden;
 }
 
 .backgroundLayer {
-  position: absolute;
-  /* Changed from absolute to fixed */ 
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
-  /* Lower z-index for background */
-
-        /* background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%), #000000 ; */
-       /* background: radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%); */
-        background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99, 102, 241, 0.25), transparent 70%), #000000;
-        
-
- 
+  background-color: #09090B;
+  z-index: -2;
 }
 
 .contentLayer {
   position: relative;
-  z-index: 2;
-  /* Above background, below navbar */
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
+  z-index: 1;
+  background-color: transparent;
+}
+
+/* Ensure all child components inherit the dark background */
+.homeContainer * {
+  box-sizing: border-box;
+}
+
+/* Override any component backgrounds that might interfere */
+.homeContainer > .contentLayer > * {
+  background-color: transparent !important;
+}
+
+/* Optional: Add subtle texture or pattern */
+.homeContainer::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #09090B;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.01) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.01) 0%, transparent 50%);
+  z-index: -1;
+}
+
+/* Ensure consistent spacing */
+.contentLayer {
+  padding: 0;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .homeContainer {
+    min-height: 100vh;
+  }
 }

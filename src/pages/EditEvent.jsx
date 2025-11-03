@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   MdArrowBack,
@@ -9,13 +9,15 @@ import {
   MdCategory,
   MdImage,
   MdSave,
-  MdGroup, // Add this import
+  MdGroup,
 } from "react-icons/md";
-import styles from "./CreateEvent.module.css";
+import styles from "./CreateEvent.module.css"; // Reuse the same styles
 
-const CreateEvent = () => {
+const EditEvent = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingEvent, setIsLoadingEvent] = useState(true);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -23,8 +25,9 @@ const CreateEvent = () => {
     time: "",
     venue: "",
     category: "",
-    maxParticipants: 50, // Add this field
+    maxParticipants: 50,
     poster: null,
+    currentImageUrl: "",
   });
 
   const categories = [
@@ -41,6 +44,59 @@ const CreateEvent = () => {
     "Dance",
     "Literature",
   ];
+
+  // Fetch event data for editing
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        setIsLoadingEvent(true);
+        const response = await fetch(`http://localhost:5000/api/events/${id}`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch event");
+        }
+
+        const data = await response.json();
+        const event = data.event || data;
+
+        // Check if current user is the event creator
+        const currentUserId = localStorage.getItem("userId");
+        if (event.createdBy !== currentUserId && event.authorId !== currentUserId) {
+          toast.error("You don't have permission to edit this event");
+          navigate("/dashboard");
+          return;
+        }
+
+        // Format date and time for form inputs
+        const eventDate = new Date(event.date);
+        const formattedDate = eventDate.toISOString().split('T')[0];
+        const formattedTime = eventDate.toTimeString().slice(0, 5);
+
+        setFormData({
+          title: event.title || "",
+          description: event.description || "",
+          date: formattedDate,
+          time: formattedTime,
+          venue: event.venue || "",
+          category: event.type || event.category || "",
+          maxParticipants: event.maxParticipants || 50,
+          poster: null,
+          currentImageUrl: event.image || event.imageUrl || "",
+        });
+
+      } catch (error) {
+        console.error("Error fetching event:", error);
+        toast.error("Failed to load event data");
+        navigate("/dashboard");
+      } finally {
+        setIsLoadingEvent(false);
+      }
+    };
+
+    if (id) {
+      fetchEvent();
+    }
+  }, [id, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -106,11 +162,13 @@ const CreateEvent = () => {
       return false;
     }
 
-    // Validate date is not in the past
+    // Validate date is not in the past (allow current events)
     const selectedDate = new Date(`${date}T${time}`);
     const now = new Date();
+    now.setHours(now.getHours() - 1); // Allow events starting within 1 hour
+    
     if (selectedDate <= now) {
-      toast.error("Event date and time must be in the future");
+      toast.error("Event date and time cannot be in the past");
       return false;
     }
 
@@ -139,7 +197,8 @@ const CreateEvent = () => {
         return;
       }
 
-      const requestBody = {
+      // Create the update data object
+      const updateData = {
         title: formData.title,
         description: formData.description,
         date: eventDateTime.toISOString(),
@@ -147,63 +206,71 @@ const CreateEvent = () => {
         venue: formData.venue,
         type: formData.category,
         maxParticipants: parseInt(formData.maxParticipants),
-        createdBy: userId, // ✅ ADD THIS LINE
+        updatedBy: userId,
         registrationDeadline: eventDateTime.toISOString(),
-        imageUrl:
-          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
       };
 
-      console.log("Sending request body:", requestBody);
+      // Only include image if a new one was uploaded
+      if (formData.poster) {
+        // For now, we'll use a placeholder. You can implement image upload later
+        updateData.imageUrl = formData.currentImageUrl || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+      }
 
-      // Make API call
-      const response = await fetch("http://localhost:5000/api/events", {
-        method: "POST",
+      console.log("Sending update data:", updateData);
+
+      // Make API call to update event
+      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(updateData),
       });
 
       const responseData = await response.json();
-      console.log("Response:", responseData);
+      console.log("Update response:", responseData);
 
       if (response.ok) {
-        console.log("Event created successfully:", responseData);
-        toast.success("Event created successfully!");
+        console.log("Event updated successfully:", responseData);
+        toast.success("Event updated successfully!");
 
-        // Reset form
-        setFormData({
-          title: "",
-          description: "",
-          date: "",
-          time: "",
-          venue: "",
-          category: "",
-          maxParticipants: 50, // Add this
-          poster: null,
-        });
-
-        // Navigate to events page
+        // Navigate back to dashboard or event details
         setTimeout(() => {
-          navigate("/events");
+          navigate("/dashboard");
         }, 1500);
       } else {
         console.error("Server error:", responseData);
-        toast.error(responseData.message || "Failed to create event");
+        toast.error(responseData.message || "Failed to update event");
       }
     } catch (error) {
-      console.error("Error creating event:", error);
+      console.error("Error updating event:", error);
       toast.error("Network error. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
+
   const handleGoBack = () => {
-    navigate("/manage-events");
+    navigate("/dashboard");
   };
 
   // Get today's date for min date validation
   const today = new Date().toISOString().split("T")[0];
+
+  if (isLoadingEvent) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <div className={styles.titleSection}>
+              <h1 className={styles.title}>Loading Event...</h1>
+              <p className={styles.subtitle}>Please wait while we load the event data</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -212,13 +279,13 @@ const CreateEvent = () => {
         <div className={styles.header}>
           <button onClick={handleGoBack} className={styles.backButton}>
             <MdArrowBack size={20} />
-            Back to Manage Events
+            Back to Dashboard
           </button>
 
           <div className={styles.titleSection}>
-            <h1 className={styles.title}>Create New Event</h1>
+            <h1 className={styles.title}>Edit Event</h1>
             <p className={styles.subtitle}>
-              Fill in the details to create a new campus event
+              Update your event details
             </p>
           </div>
         </div>
@@ -356,11 +423,34 @@ const CreateEvent = () => {
             />
           </div>
 
+          {/* Current Image Display */}
+          {formData.currentImageUrl && (
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                <MdImage size={18} />
+                Current Event Poster
+              </label>
+              <div style={{ marginBottom: "1rem" }}>
+                <img 
+                  src={formData.currentImageUrl} 
+                  alt="Current event poster" 
+                  style={{ 
+                    width: "200px", 
+                    height: "120px", 
+                    objectFit: "cover", 
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255, 255, 255, 0.12)"
+                  }} 
+                />
+              </div>
+            </div>
+          )}
+
           {/* Poster Upload */}
           <div className={styles.formGroup}>
             <label htmlFor="poster" className={styles.label}>
               <MdImage size={18} />
-              Event Poster (Optional)
+              Update Event Poster (Optional)
             </label>
             <input
               type="file"
@@ -372,7 +462,7 @@ const CreateEvent = () => {
             />
             {formData.poster && (
               <p className={styles.fileSelected}>
-                Selected: {formData.poster.name}
+                New image selected: {formData.poster.name}
               </p>
             )}
             <p className={styles.fileHelp}>
@@ -398,12 +488,12 @@ const CreateEvent = () => {
               {isLoading ? (
                 <>
                   <div className={styles.spinner}></div>
-                  Creating Event...
+                  Updating Event...
                 </>
               ) : (
                 <>
                   <MdSave size={20} />
-                  Create Event
+                  Update Event
                 </>
               )}
             </button>
@@ -413,8 +503,7 @@ const CreateEvent = () => {
         {/* Help Text */}
         <div className={styles.helpText}>
           <p>
-            * Required fields. Make sure all information is accurate before
-            submitting.
+            * Required fields. Only event creators can edit their events.
           </p>
         </div>
       </div>
@@ -422,4 +511,4 @@ const CreateEvent = () => {
   );
 };
 
-export default CreateEvent;
+export default EditEvent;

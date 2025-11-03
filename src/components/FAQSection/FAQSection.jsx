@@ -69,8 +69,16 @@ const FAQSection = () => {
           </div>
 
           <div className={styles.ctaSection}>
-            <p>Still have questions?</p>
-            <button className={styles.contactButton}>Contact Support</button>
+            <h4>Still have a questions?</h4>
+            <p>Can't find the answer to your question? Send us an email and we'll get back to you as soon as possible.</p>
+            <a
+              className={styles.contactButton}
+              href={`mailto:krish.darji@somaiya.edu?subject=${encodeURIComponent('InCampus: Question')}&body=${encodeURIComponent(
+                'Hi Krish,\n\nI have a question about InCampus:\n\n'
+              )}`}
+            >
+              Send Email
+            </a>
           </div>
         </div>
       </section>
