@@ -4,15 +4,17 @@
   overflow: hidden;
   margin: 0 auto;
   padding-top: 2rem;
-  /* Add padding to account for fixed navbar */
   position: relative;
   z-index: 2;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .heroContainer {
   margin: 0 auto;
   max-width: 1200px;
+  width: 100%;
   z-index: 2;
   position: relative;
   min-height: auto;
@@ -21,7 +23,6 @@
 
 .heroContent {
   display: flex;
-  /*flex-direction: column; /Change to row for side-by-side layout */
   align-items: center;
   justify-content: space-between;
   animation: fadeInUp 0.8s ease-out forwards;
@@ -32,7 +33,6 @@
 .contentLeft {
   flex: 1;
   text-align: left;
-  /* Change to left align for better layout */
   max-width: 600px;
   margin-left: 4rem;
 }
@@ -40,12 +40,9 @@
 .contentRight {
   flex: 1;
   max-width: 600px;
-  /* margin-left: 20px; */
   display: flex;
   justify-content: center;
   align-items: center;
-  /* padding: 8rem; */
-
 }
 
 .title {
@@ -53,7 +50,6 @@
   line-height: 1.1;
   font-weight: 600;
   color: white;
-  /* margin-bottom: 1rem; */
   margin-bottom: 0.5rem;
   display: flex;
   flex-wrap: wrap;
@@ -86,8 +82,6 @@
     0 4px 20px rgba(0, 0, 0, 0.1),
     inset 0 0 12px rgba(11, 103, 156, 0.1);
   transition: all 0.4s ease;
- 
-
 }
 
 .rotatingText::before {
@@ -108,16 +102,6 @@
   overflow: hidden;
 }
 
-/* .title span {
-  font-family: "Playfair Display", serif;
-  font-optical-sizing: auto;
-  font-weight: 300;
-  font-style: italic;
-  background: #F8FF24;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-} */
-
 .description {
   display: block;
   color: rgba(196, 195, 195, 0.95);
@@ -128,7 +112,7 @@
   line-height: 1.6;
 }
 
-.button a {
+.button {
   display: flex;
   margin: 2rem 0;
   justify-content: flex-start;
@@ -140,7 +124,6 @@
   width: 100%;
   height: auto;
   max-height: 600px;
-  /* Increased from previous suggestion */
   object-fit: contain;
   transform: scale(1.3);
 }
@@ -150,59 +133,248 @@
     opacity: 0;
     transform: translateY(30px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .heroContainer {
-    padding: 0 1rem;
-  }
+/* Enhanced Responsive Design */
 
+/* Large Tablets (1024px and below) */
+@media (max-width: 1024px) {
   .heroContent {
-    flex-direction: column;
-    text-align: center;
-    gap: 2rem;
-  }
+    gap: 3rem;
+    padding: 1.5rem 0;
+  margin-top: 62px;
 
+  }
+  
   .contentLeft {
-    text-align: center;
+    margin-left: 2rem;
+    max-width: 500px;
   }
-
+  
   .title {
-    font-size: 2.5rem;
-    justify-content: center;
-    text-align: center;
+    font-size: 3.5rem;
   }
-
-  .rotatingText {
-    font-size: 0.85em;
-    padding: 0.6rem 1.2rem;
-  }
-
+  
   .description {
-    max-width: 100%;
-    text-align: center;
+    font-size: 1.15rem;
+    max-width: 600px;
   }
-
-  .button a {
-    justify-content: center;
+  
+  .isometricImage {
+    transform: scale(1.2);
+    max-height: 500px;
   }
 }
 
-@media (max-width: 480px) {
-  .title {
-    font-size: 2rem;
-    flex-direction: column;
-    align-items: flex-start;
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .hero {
+    padding-top: 1rem;
+    min-height: auto;
+    padding-bottom: 2rem;
   }
+  
+  .heroContainer {
+    padding: 0 1.5rem;
+  }
+  
+  .heroContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 2.5rem;
+    padding: 1rem 0;
+  }
+  
+  .contentLeft {
+    text-align: center;
+    margin-left: 0;
+    max-width: 100%;
+    order: 1;
+  }
+  
+  .contentRight {
+    max-width: 100%;
+    order: 2;
+  }
+  
+  .title {
+    font-size: 3rem;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .rotatingText {
+    font-size: 0.9em;
+    padding: 0.6rem 1.2rem;
+    margin: 0.25rem 0;
+  }
+  
+  .description {
+    max-width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .button {
+    justify-content: center;
+    margin: 1.5rem 0;
+  }
+  
+  .isometricImage {
+    transform: scale(1.1);
+    max-height: 400px;
+  }
+}
 
+/* Small Tablets and Large Phones (640px and below) */
+@media (max-width: 640px) {
+  .heroContainer {
+    padding: 0 1.25rem;
+  }
+  
+  .heroContent {
+    gap: 2rem;
+  }
+  
+  .title {
+    font-size: 2.75rem;
+  }
+  
+  .description {
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  
+  .isometricImage {
+    transform: scale(1);
+    max-height: 350px;
+  }
+}
+
+/* Mobile Phones (480px and below) */
+@media (max-width: 480px) {
+  .hero {
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .heroContainer {
+    padding: 0 1rem;
+  }
+  
+  .heroContent {
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+  }
+  
+  .title {
+    font-size: 2.25rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  
   .rotatingText {
     font-size: 0.8em;
     padding: 0.5rem 1rem;
+    margin: 0.2rem 0;
+  }
+  
+  .description {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
+  }
+  
+  .button {
+    margin: 1.25rem 0;
+  }
+  
+  .isometricImage {
+    max-height: 280px;
+    transform: scale(0.9);
+  }
+}
+
+/* Small Mobile Phones (360px and below) */
+@media (max-width: 360px) {
+  .heroContainer {
+    padding: 0 0.75rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .rotatingText {
+    font-size: 0.75em;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .description {
+    font-size: 0.9rem;
+  }
+  
+  .isometricImage {
+    max-height: 250px;
+    transform: scale(0.85);
+  }
+}
+
+/* Landscape Mode for Mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .heroContent {
+    flex-direction: row;
+    gap: 2rem;
+    padding: 0.5rem 0;
+  }
+  
+  .contentLeft {
+    flex: 1;
+    text-align: left;
+    max-width: 50%;
+  }
+  
+  .contentRight {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+  }
+  
+  .description {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .isometricImage {
+    max-height: 250px;
+    transform: scale(1);
+  }
+}
+
+/* High-DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .rotatingText {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 }

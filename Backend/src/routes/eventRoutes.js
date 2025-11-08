@@ -19,6 +19,7 @@ const createEventUploadDirs = () => {
     "public/uploads/events",
     "public/uploads/events/id-images",
     "public/uploads/events/documents",
+    "public/uploads/events/images", // Add this for event images
   ];
 
   dirs.forEach((dir) => {
@@ -30,6 +31,43 @@ const createEventUploadDirs = () => {
 
 // Initialize upload directories
 createEventUploadDirs();
+
+// Configure multer for event image uploads
+const eventImageStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/events/images/");
+  },
+  filename: function (req, file, cb) {
+    const timestamp = Date.now();
+    const extension = path.extname(file.originalname);
+    const filename = `event-${timestamp}${extension}`;
+    cb(null, filename);
+  },
+});
+
+// File filter for event images
+const eventImageFileFilter = (req, file, cb) => {
+  const allowedImageTypes = /jpeg|jpg|png|gif/;
+  const extname = allowedImageTypes.test(
+    path.extname(file.originalname).toLowerCase()
+  );
+  const mimetype = allowedImageTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    cb(null, true);
+  } else {
+    cb(new Error("Event image must be JPEG, JPG, PNG, or GIF format"), false);
+  }
+};
+
+// Event image upload configuration
+const eventImageUpload = multer({
+  storage: eventImageStorage,
+  fileFilter: eventImageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
 
 // Configure multer for event registration file uploads
 const eventStorage = multer.diskStorage({
@@ -137,8 +175,13 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// POST /api/events - Create new event
-router.post("/", createEvent);
+// POST /api/events - Create new event with image upload
+router.post(
+  "/",
+  eventImageUpload.single("eventImage"), // Handle single image upload
+  handleEventMulterError,
+  createEvent
+);
 
 // POST /api/events/:id/register - Register for event with file uploads
 router.post(
@@ -255,6 +298,35 @@ router.post("/fix-created-by", async (req, res) => {
       success: false,
       message: error.message,
     });
+  }
+});
+
+router.get("/debug/files", async (req, res) => {
+  const fs = require("fs");
+  const path = require("path");
+
+  try {
+    const uploadsPath = path.join(
+      __dirname,
+      "../../public/uploads/events/images"
+    );
+    console.log("🔍 Checking uploads path:", uploadsPath);
+
+    const pathExists = fs.existsSync(uploadsPath);
+    const files = pathExists ? fs.readdirSync(uploadsPath) : [];
+
+    res.json({
+      uploadsPath,
+      pathExists,
+      files: files.map((file) => ({
+        name: file,
+        url: `http://localhost:5000/uploads/events/images/${file}`,
+        fullPath: path.join(uploadsPath, file),
+      })),
+      sampleEvents: await Event.find().select("title image imageUrl").limit(3),
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -10,7 +11,22 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
+
+// FIXED: Correct static file serving paths
+// Serve uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+// Serve entire public directory
+app.use(express.static(path.join(__dirname, "../public")));
+
+// Debug middleware to log file requests
+app.use("/uploads", (req, res, next) => {
+  console.log("🖼️ Image request:", req.url);
+  console.log(
+    "📁 Full path:",
+    path.join(__dirname, "../public/uploads", req.url)
+  );
+  next();
+});
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/incampus");
@@ -26,19 +42,24 @@ mongoose.connection.on("error", (err) => {
 // Import routes
 const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes"); // Single import
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // Use routes
 app.use("/api/events", eventRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/dashboard", dashboardRoutes); // Single usage
+app.use("/api/dashboard", dashboardRoutes);
 
-// Health check endpoint
+// Health check endpoint with debug info
 app.get("/api/health", (req, res) => {
   res.json({
     status: "Server is running",
     timestamp: new Date().toISOString(),
     port: PORT,
+    uploadsPath: path.join(__dirname, "../public/uploads"),
+    staticPaths: {
+      uploads: "/uploads",
+      public: path.join(__dirname, "../public"),
+    },
   });
 });
 
@@ -62,7 +83,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Something went wrong!",
-    error: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal server error",
   });
 });
 
@@ -80,6 +104,8 @@ app.listen(PORT, () => {
   console.log(`📅 Events API: http://localhost:${PORT}/api/events`);
   console.log(`👤 Users API: http://localhost:${PORT}/api/users`);
   console.log(`📈 Dashboard API: http://localhost:${PORT}/api/dashboard`);
+  console.log(`📁 Uploads served at: http://localhost:${PORT}/uploads/`);
+  console.log(`📂 Static path: ${path.join(__dirname, "../public")}`);
 });
 
 module.exports = app;

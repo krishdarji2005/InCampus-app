@@ -10,23 +10,33 @@ const CompactSearchBar = ({
 }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const searchBarRef = useRef(null);
+  const modalRef = useRef(null); // Add ref for modal
 
-  // Close dropdown when clicking outside
+  // Enhanced click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        searchBarRef.current &&
-        !searchBarRef.current.contains(event.target)
-      ) {
-        // setActiveDropdown(null);
+      const isClickInsideSearchBar =
+        searchBarRef.current && searchBarRef.current.contains(event.target);
+      const isClickInsideModal =
+        modalRef.current && modalRef.current.contains(event.target);
+
+      // Don't close if click is inside search bar or modal
+      if (!isClickInsideSearchBar && !isClickInsideModal) {
+        setActiveDropdown(null);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    // Only add listener when dropdown is active
+    if (activeDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside); // Add touch support
+    }
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, []);
+  }, [activeDropdown]); // Add activeDropdown as dependency
 
   const categories = ["All", "Academic", "Professional", "Social", "Sports"];
   const formats = ["All", "In-person", "Virtual", "Hybrid"];
@@ -72,7 +82,7 @@ const CompactSearchBar = ({
       ...filters,
       [filterType]: value,
     });
-    // Only close dropdown if it's not the "more" filters modal
+    // Only close dropdown for simple filters, not the "more" modal
     if (activeDropdown !== "more") {
       setActiveDropdown(null);
     }
@@ -86,11 +96,28 @@ const CompactSearchBar = ({
         [type]: value,
       },
     });
+    // Don't close modal when changing date range
   };
+
   const handleSortChange = (value) => {
     onSortChange(value);
     // Don't close the more filters modal when sort changes
   };
+
+  // Enhanced section click handler
+  const handleSectionClick = (sectionType, event) => {
+    event.stopPropagation(); // Prevent event bubbling
+    setActiveDropdown(activeDropdown === sectionType ? null : sectionType);
+  };
+
+  // Enhanced modal close handler
+  const closeModal = (event) => {
+    if (event) {
+      event.stopPropagation();
+    }
+    setActiveDropdown(null);
+  };
+
   const getActiveFiltersCount = () => {
     let count = 0;
     if (filters.category !== "All") count++;
@@ -134,7 +161,10 @@ const CompactSearchBar = ({
           className={`${styles.dropdownItem} ${
             currentValue === option ? styles.active : ""
           }`}
-          onClick={() => handleFilterChange(type, option)}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            handleFilterChange(type, option);
+          }}
         >
           {option}
         </button>
@@ -143,12 +173,13 @@ const CompactSearchBar = ({
   );
 
   const renderMoreFiltersModal = () => (
-    <div className={styles.moreFiltersModal}>
+    <div className={styles.moreFiltersModal} ref={modalRef}>
       <div className={styles.modalHeader}>
         <h3>More Filters</h3>
         <button
           className={styles.closeButton}
-          onClick={() => setActiveDropdown(null)}
+          onClick={closeModal}
+          type="button"
         >
           ×
         </button>
@@ -159,8 +190,12 @@ const CompactSearchBar = ({
           <h4>Sort by</h4>
           <select
             value={sortBy}
-            onChange={(e) => ohandleSortChange(e.target.value)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleSortChange(e.target.value);
+            }}
             className={styles.sortSelect}
+            onClick={(e) => e.stopPropagation()}
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -179,7 +214,11 @@ const CompactSearchBar = ({
                 className={`${styles.chip} ${
                   filters.price === price ? styles.active : ""
                 }`}
-                onClick={() => handleFilterChange("price", price)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFilterChange("price", price);
+                }}
+                type="button"
               >
                 {price}
               </button>
@@ -196,7 +235,11 @@ const CompactSearchBar = ({
                 className={`${styles.chip} ${
                   filters.timeSlot === timeSlot ? styles.active : ""
                 }`}
-                onClick={() => handleFilterChange("timeSlot", timeSlot)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFilterChange("timeSlot", timeSlot);
+                }}
+                type="button"
               >
                 {timeSlot}
               </button>
@@ -208,8 +251,12 @@ const CompactSearchBar = ({
           <h4>Department/Organization</h4>
           <select
             value={filters.department}
-            onChange={(e) => handleFilterChange("department", e.target.value)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleFilterChange("department", e.target.value);
+            }}
             className={styles.filterSelect}
+            onClick={(e) => e.stopPropagation()}
           >
             {departments.map((dept) => (
               <option key={dept} value={dept}>
@@ -225,29 +272,45 @@ const CompactSearchBar = ({
             <input
               type="date"
               value={filters.dateRange.start}
-              onChange={(e) => handleDateRangeChange("start", e.target.value)}
+              onChange={(e) => {
+                e.stopPropagation();
+                handleDateRangeChange("start", e.target.value);
+              }}
               className={styles.dateInput}
               placeholder="Start date"
+              onClick={(e) => e.stopPropagation()}
             />
             <span className={styles.dateSeparator}>to</span>
             <input
               type="date"
               value={filters.dateRange.end}
-              onChange={(e) => handleDateRangeChange("end", e.target.value)}
+              onChange={(e) => {
+                e.stopPropagation();
+                handleDateRangeChange("end", e.target.value);
+              }}
               className={styles.dateInput}
               placeholder="End date"
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
         </div>
       </div>
 
       <div className={styles.modalFooter}>
-        <button className={styles.clearButton} onClick={onClearFilters}>
+        <button
+          className={styles.clearButton}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClearFilters();
+          }}
+          type="button"
+        >
           Clear All
         </button>
         <button
           className={styles.applyButton}
-          onClick={() => setActiveDropdown(null)}
+          onClick={closeModal}
+          type="button"
         >
           Apply Filters
         </button>
@@ -262,9 +325,7 @@ const CompactSearchBar = ({
         className={`${styles.section} ${
           activeDropdown === "category" ? styles.active : ""
         }`}
-        onClick={() =>
-          setActiveDropdown(activeDropdown === "category" ? null : "category")
-        }
+        onClick={(e) => handleSectionClick("category", e)}
       >
         <div className={styles.sectionContent}>
           <span className={styles.label}>Category</span>
@@ -287,9 +348,7 @@ const CompactSearchBar = ({
         className={`${styles.section} ${
           activeDropdown === "format" ? styles.active : ""
         }`}
-        onClick={() =>
-          setActiveDropdown(activeDropdown === "format" ? null : "format")
-        }
+        onClick={(e) => handleSectionClick("format", e)}
       >
         <div className={styles.sectionContent}>
           <span className={styles.label}>Format</span>
@@ -302,51 +361,12 @@ const CompactSearchBar = ({
           renderDropdown("format", formats, filters.format, "Any Format")}
       </div>
 
-      {/* Date Range Section */}
-      {/* <div
-        className={`${styles.section} ${
-          activeDropdown === "dateRange" ? styles.active : ""
-        }`}
-        onClick={() =>
-          setActiveDropdown(activeDropdown === "dateRange" ? null : "dateRange")
-        }
-      >
-        <div className={styles.sectionContent}>
-          <span className={styles.label}>When</span>
-          <span className={styles.value}>{formatDateRange()}</span>
-          <span className={styles.arrow}>▼</span>
-        </div>
-        {activeDropdown === "dateRange" && (
-          <div className={styles.dateRangeDropdown}>
-            <div className={styles.dateRange}>
-              <input
-                type="date"
-                value={filters.dateRange.start}
-                onChange={(e) => handleDateRangeChange("start", e.target.value)}
-                className={styles.dateInput}
-                placeholder="Start date"
-              />
-              <span className={styles.dateSeparator}>to</span>
-              <input
-                type="date"
-                value={filters.dateRange.end}
-                onChange={(e) => handleDateRangeChange("end", e.target.value)}
-                className={styles.dateInput}
-                placeholder="End date"
-              />
-            </div>
-          </div>
-        )}
-      </div> */}
-
       {/* More Filters Section */}
       <div
         className={`${styles.section} ${
           activeDropdown === "more" ? styles.active : ""
         }`}
-        onClick={() =>
-          setActiveDropdown(activeDropdown === "more" ? null : "more")
-        }
+        onClick={(e) => handleSectionClick("more", e)}
       >
         <div className={styles.sectionContent}>
           <span className={styles.label}>More Filters</span>

@@ -1,5 +1,6 @@
 import React from "react";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import styles from "./Footer.module.css";
 
 const Footer = () => {
@@ -11,8 +12,8 @@ const Footer = () => {
             <h6>About InCampus</h6>
             <p className={styles.textJustify}>
               <strong>InCampus</strong> is your all-in-one platform to explore
-              and join campus events. From bootcamps and workshops to cultural
-              nights and club meetups, every official college activity is
+              and join campus events. From workshops and seminars to cultural
+              nights and competitions, every official college activity is
               curated in one place.
             </p>
             <p className={styles.textJustify}>
@@ -27,22 +28,22 @@ const Footer = () => {
             <h6>Event Categories</h6>
             <ul className={styles.footerLinks}>
               <li>
-                <a href="/academic">Academic</a>
+                <Link to="/events?category=Academic">Academic</Link>
               </li>
               <li>
-                <a href="/workshops">Workshops</a>
+                <Link to="/events?category=Workshop">Workshops</Link>
               </li>
               <li>
-                <a href="/social">Social Events</a>
+                <Link to="/events?category=Cultural">Cultural</Link>
               </li>
               <li>
-                <a href="/sports">Sports</a>
+                <Link to="/events?category=Sports">Sports</Link>
               </li>
               <li>
-                <a href="/cultural">Cultural</a>
+                <Link to="/events?category=Technical">Technical</Link>
               </li>
               <li>
-                <a href="/volunteering">Volunteering</a>
+                <Link to="/events?category=Competition">Competitions</Link>
               </li>
             </ul>
           </div>
@@ -51,19 +52,19 @@ const Footer = () => {
             <h6>Quick Links</h6>
             <ul className={styles.footerLinks}>
               <li>
-                <a href="/about">About Us</a>
+                <Link to="/profile">My Profile</Link>
               </li>
               <li>
-                <a href="/contact">Contact</a>
+                <Link to="/dashboard">Dashboard</Link>
               </li>
               <li>
-                <a href="/organizers">For Organizers</a>
+                <Link to="/create-event">Create Event</Link>
               </li>
               <li>
-                <a href="/privacy">Privacy Policy</a>
+                <Link to="/events">Browse Events</Link>
               </li>
               <li>
-                <a href="/terms">Terms of Use</a>
+                <Link to="/">Home</Link>
               </li>
             </ul>
           </div>
@@ -75,29 +76,53 @@ const Footer = () => {
           <div className={styles.colMd8ColSm6ColXs12}>
             <p className={styles.copyrightText}>
               Copyright &copy; {new Date().getFullYear()} All Rights Reserved by
-              <a href="/"> InCampus</a>.
+              <Link to="/"> InCampus</Link>.
             </p>
           </div>
 
           <div className={styles.colMd4ColSm6ColXs12}>
             <ul className={styles.socialIcons}>
               <li>
-                <a className={styles.facebook} href="#">
+                <a
+                  className={styles.facebook}
+                  href="https://facebook.com/incampus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                >
                   <FaFacebook />
                 </a>
               </li>
               <li>
-                <a className={styles.twitter} href="#">
+                <a
+                  className={styles.twitter}
+                  href="https://twitter.com/incampus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Twitter"
+                >
                   <FaTwitter />
                 </a>
               </li>
               <li>
-                <a className={styles.instagram} href="#">
+                <a
+                  className={styles.instagram}
+                  href="https://instagram.com/incampus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
                   <FaInstagram />
                 </a>
               </li>
               <li>
-                <a className={styles.linkedin} href="#">
+                <a
+                  className={styles.linkedin}
+                  href="https://linkedin.com/company/incampus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                >
                   <FaLinkedin />
                 </a>
               </li>

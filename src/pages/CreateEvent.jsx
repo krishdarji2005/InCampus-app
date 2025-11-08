@@ -9,7 +9,7 @@ import {
   MdCategory,
   MdImage,
   MdSave,
-  MdGroup, // Add this import
+  MdGroup,
 } from "react-icons/md";
 import styles from "./CreateEvent.module.css";
 
@@ -23,9 +23,10 @@ const CreateEvent = () => {
     time: "",
     venue: "",
     category: "",
-    maxParticipants: 50, // Add this field
+    maxParticipants: 50,
     poster: null,
   });
+  const [previewImage, setPreviewImage] = useState(null); // Add image preview
 
   const categories = [
     "Technical",
@@ -70,6 +71,10 @@ const CreateEvent = () => {
         ...prev,
         poster: file,
       }));
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
     }
   };
 
@@ -139,29 +144,34 @@ const CreateEvent = () => {
         return;
       }
 
-      const requestBody = {
-        title: formData.title,
-        description: formData.description,
-        date: eventDateTime.toISOString(),
-        time: formData.time,
-        venue: formData.venue,
-        type: formData.category,
-        maxParticipants: parseInt(formData.maxParticipants),
-        createdBy: userId, // ✅ ADD THIS LINE
-        registrationDeadline: eventDateTime.toISOString(),
-        imageUrl:
-          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-      };
+      // Create FormData for file upload
+      const submitData = new FormData();
+      submitData.append("title", formData.title);
+      submitData.append("description", formData.description);
+      submitData.append("date", eventDateTime.toISOString());
+      submitData.append("time", formData.time);
+      submitData.append("venue", formData.venue);
+      submitData.append("type", formData.category);
+      submitData.append("category", formData.category); // Add both for compatibility
+      submitData.append("maxParticipants", parseInt(formData.maxParticipants));
+      submitData.append("createdBy", userId);
+      submitData.append("registrationDeadline", eventDateTime.toISOString());
 
-      console.log("Sending request body:", requestBody);
+      // Add image file if present
+      if (formData.poster) {
+        submitData.append("eventImage", formData.poster);
+      }
 
-      // Make API call
+      console.log(
+        "Sending FormData with image:",
+        formData.poster ? "Yes" : "No"
+      );
+
+      // Make API call with FormData (not JSON)
       const response = await fetch("http://localhost:5000/api/events", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
+        body: submitData, // Send FormData, not JSON
+        // Don't set Content-Type header - let browser set it with boundary
       });
 
       const responseData = await response.json();
@@ -171,6 +181,11 @@ const CreateEvent = () => {
         console.log("Event created successfully:", responseData);
         toast.success("Event created successfully!");
 
+        // Cleanup preview URL
+        if (previewImage) {
+          URL.revokeObjectURL(previewImage);
+        }
+
         // Reset form
         setFormData({
           title: "",
@@ -179,9 +194,10 @@ const CreateEvent = () => {
           time: "",
           venue: "",
           category: "",
-          maxParticipants: 50, // Add this
+          maxParticipants: 50,
           poster: null,
         });
+        setPreviewImage(null);
 
         // Navigate to events page
         setTimeout(() => {
@@ -198,7 +214,12 @@ const CreateEvent = () => {
       setIsLoading(false);
     }
   };
+
   const handleGoBack = () => {
+    // Cleanup preview URL on navigation
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage);
+    }
     navigate("/manage-events");
   };
 
@@ -356,12 +377,35 @@ const CreateEvent = () => {
             />
           </div>
 
-          {/* Poster Upload */}
+          {/* Poster Upload with Preview */}
           <div className={styles.formGroup}>
             <label htmlFor="poster" className={styles.label}>
               <MdImage size={18} />
               Event Poster (Optional)
             </label>
+
+            {/* Image Preview */}
+            {previewImage && (
+              <div className={styles.imagePreview}>
+                <img
+                  src={previewImage}
+                  alt="Event poster preview"
+                  className={styles.previewImage}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData((prev) => ({ ...prev, poster: null }));
+                    setPreviewImage(null);
+                    URL.revokeObjectURL(previewImage);
+                  }}
+                  className={styles.removeImageButton}
+                >
+                  Remove Image
+                </button>
+              </div>
+            )}
+
             <input
               type="file"
               id="poster"
@@ -370,6 +414,7 @@ const CreateEvent = () => {
               accept="image/*"
               className={styles.fileInput}
             />
+
             {formData.poster && (
               <p className={styles.fileSelected}>
                 Selected: {formData.poster.name}

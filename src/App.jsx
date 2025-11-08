@@ -11,16 +11,17 @@ import ErrorPage from "./pages/ErrorPage";
 import Committees from "./pages/Committees";
 import CreateEvent from "./pages/CreateEvent";
 import Profile from "./pages/Profile";
-
+import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import OnboardingFlow from "./components/OnboardingFlow/OnboardingFlow";
 import Dashboard from "./pages/Dashboard";
-import EditEvent from "./pages/EditEvent"
+import EditEvent from "./pages/EditEvent";
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <AuthWrapper>
         <ErrorBoundary>
+          <ScrollToTop />
           <AppLayout />
         </ErrorBoundary>
       </AuthWrapper>
@@ -47,8 +48,8 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-            {
-        path: "/events/:id/edit", 
+      {
+        path: "/events/:id/edit",
         element: (
           <ProtectedRoute>
             <EditEvent />

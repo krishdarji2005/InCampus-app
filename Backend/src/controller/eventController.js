@@ -21,30 +21,57 @@ const deleteUploadedFiles = (files) => {
   });
 };
 
-// Create new event
+// Create new event with proper image handling
 const createEvent = async (req, res) => {
   try {
     const eventData = req.body;
+    const uploadedFile = req.file;
 
-    // ✅ ADD THIS: Extract createdBy from request body
+    console.log("=== CREATE EVENT DEBUG ===");
+    console.log("Event data:", eventData);
+    console.log("Uploaded file:", uploadedFile);
+    console.log("========================");
+
     const { createdBy } = eventData;
 
     if (!createdBy) {
+      if (uploadedFile && fs.existsSync(uploadedFile.path)) {
+        fs.unlinkSync(uploadedFile.path);
+      }
       return res.status(400).json({
         success: false,
         message: "Creator ID is required",
       });
     }
 
-    // ✅ Ensure createdBy is set in the event data
-    const event = new Event({
+    const newEventData = {
       ...eventData,
       createdBy: createdBy,
-    });
+      category: eventData.category || eventData.type,
+      type: eventData.type || eventData.category,
+    };
 
+    if (uploadedFile) {
+      const imageUrl = `/uploads/events/images/${uploadedFile.filename}`;
+      newEventData.image = imageUrl;
+      newEventData.imageUrl = imageUrl;
+      console.log("✅ Image uploaded successfully:");
+      console.log("📁 File path:", uploadedFile.path);
+      console.log("🔗 URL path:", imageUrl);
+      console.log("🌐 Full URL:", `http://localhost:5000${imageUrl}`);
+    } else {
+      const defaultImage =
+        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+      newEventData.image = defaultImage;
+      newEventData.imageUrl = defaultImage;
+      console.log("📷 No image uploaded, using default");
+    }
+
+    const event = new Event(newEventData);
     await event.save();
 
-    console.log("Event created with createdBy:", event.createdBy);
+    console.log("🎉 Event created successfully:", event.title);
+    console.log("🖼️ Final image URL:", event.image);
 
     res.status(201).json({
       success: true,
@@ -52,7 +79,11 @@ const createEvent = async (req, res) => {
       event: event,
     });
   } catch (error) {
-    console.error("Create event error:", error);
+    console.error("❌ Create event error:", error);
+
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
 
     if (error.name === "ValidationError") {
       const errors = Object.values(error.errors).map((err) => err.message);
@@ -71,7 +102,7 @@ const createEvent = async (req, res) => {
   }
 };
 
-// Get all events
+// Get all events with proper image URL handling
 const getAllEvents = async (req, res) => {
   try {
     const events = await Event.find()
@@ -79,19 +110,41 @@ const getAllEvents = async (req, res) => {
       .populate("registeredUsers.userId", "name email department year")
       .sort({ createdAt: -1 });
 
-    // Transform the response to include registration count
-    const eventsWithCount = events.map((event) => ({
-      ...event.toObject(),
-      registrationCount: event.registrationCount,
-      isFull: event.isFull,
-    }));
+    const eventsWithCount = events.map((event) => {
+      const eventObj = event.toObject();
+
+      let imageUrl = eventObj.image || eventObj.imageUrl;
+
+      if (imageUrl) {
+        if (imageUrl.startsWith("/uploads/")) {
+          imageUrl = `http://localhost:5000${imageUrl}`;
+        } else if (!imageUrl.startsWith("http")) {
+          imageUrl = `http://localhost:5000/uploads/events/images/${imageUrl}`;
+        }
+      } else {
+        imageUrl =
+          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+      }
+
+      console.log(`📸 Event "${eventObj.title}" image: ${imageUrl}`);
+
+      return {
+        ...eventObj,
+        image: imageUrl,
+        registrationCount: event.registrationCount,
+        isFull: event.isFull,
+        author: eventObj.createdBy?.name || "Unknown Organizer",
+        price: "Free",
+        format: "In-Person",
+      };
+    });
 
     res.status(200).json({
       success: true,
       events: eventsWithCount,
     });
   } catch (error) {
-    console.error("Get all events error:", error);
+    console.error("❌ Get all events error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch events",
@@ -100,7 +153,7 @@ const getAllEvents = async (req, res) => {
   }
 };
 
-// Get event by ID
+// Get event by ID with proper image URL handling
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -116,18 +169,39 @@ const getEventById = async (req, res) => {
       });
     }
 
-    const eventData = {
-      ...event.toObject(),
+    const eventData = event.toObject();
+
+    let imageUrl = eventData.image || eventData.imageUrl;
+
+    if (imageUrl) {
+      if (imageUrl.startsWith("/uploads/")) {
+        imageUrl = `http://localhost:5000${imageUrl}`;
+      } else if (!imageUrl.startsWith("http")) {
+        imageUrl = `http://localhost:5000/uploads/events/images/${imageUrl}`;
+      }
+    } else {
+      imageUrl =
+        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
+    }
+
+    console.log(`📸 Event details "${eventData.title}" image: ${imageUrl}`);
+
+    const responseData = {
+      ...eventData,
+      image: imageUrl,
       registrationCount: event.registrationCount,
       isFull: event.isFull,
+      author: eventData.createdBy?.name || "Unknown Organizer",
+      price: "Free",
+      format: "In-Person",
     };
 
     res.status(200).json({
       success: true,
-      event: eventData,
+      event: responseData,
     });
   } catch (error) {
-    console.error("Get event by ID error:", error);
+    console.error("❌ Get event by ID error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch event",
@@ -136,7 +210,7 @@ const getEventById = async (req, res) => {
   }
 };
 
-// Register for event with file uploads
+// Register for event with file uploads (keep existing)
 const registerForEvent = async (req, res) => {
   try {
     const { id: eventId } = req.params;
@@ -237,7 +311,7 @@ const registerForEvent = async (req, res) => {
 
     console.log("Adding registration:", registration);
 
-    // FIXED: Use updateOne to avoid validation on entire event document
+    // Use updateOne to avoid validation on entire event document
     const updateResult = await Event.updateOne(
       { _id: eventId },
       { $push: { registeredUsers: registration } }
@@ -279,7 +353,7 @@ const registerForEvent = async (req, res) => {
   }
 };
 
-// Cancel registration
+// Cancel registration (keep existing)
 const cancelRegistration = async (req, res) => {
   try {
     const { eventId } = req.params;

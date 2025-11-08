@@ -1,8 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth0 } from "@auth0/auth0-react";
-// Remove this line: import { FixedSizeGrid as Grid } from "react-window";
 import styles from "./Events.module.css";
 import EventCard from "../components/card/EventCard";
 import SearchRow from "../components/SearchRow/SearchRow";
@@ -20,6 +19,7 @@ import { BsFillGrid3X3GapFill } from "react-icons/bs";
 
 const Events = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user: auth0User, isAuthenticated } = useAuth0();
 
   // State for MongoDB events
@@ -44,9 +44,39 @@ const Events = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showNotificationPrefs, setShowNotificationPrefs] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [selectedEventForFeedback, setSelectedEventForFeedback] = useState(null);
+  const [selectedEventForFeedback, setSelectedEventForFeedback] =
+    useState(null);
 
   const events = allEvents;
+
+  // Safe search utility function
+  const safeStringIncludes = (str, searchTerm) => {
+    if (!str || !searchTerm) return false;
+    try {
+      return String(str)
+        .toLowerCase()
+        .includes(String(searchTerm).toLowerCase());
+    } catch (error) {
+      console.warn("String comparison error:", error);
+      return false;
+    }
+  };
+
+  // Safe array search function
+  const safeArrayIncludes = (arr, searchTerm) => {
+    if (!Array.isArray(arr) || !searchTerm) return false;
+    try {
+      return arr.some((item) => {
+        if (item == null) return false;
+        return String(item)
+          .toLowerCase()
+          .includes(String(searchTerm).toLowerCase());
+      });
+    } catch (error) {
+      console.warn("Array search error:", error);
+      return false;
+    }
+  };
 
   // Fetch events from MongoDB
   const fetchEvents = async () => {
@@ -69,26 +99,28 @@ const Events = () => {
       // Transform MongoDB data to match your existing component structure
       const transformedEvents = eventsData.map((event) => ({
         id: event._id,
-        title: event.title,
-        description: event.description,
+        title: event.title || "",
+        description: event.description || "",
         date: new Date(event.date).toISOString().split("T")[0], // Format: YYYY-MM-DD
         time: new Date(event.date).toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
           hour12: true,
         }),
-        venue: event.venue,
-        category: event.category,
+        venue: event.venue || "",
+        category: event.category || "General",
         image: event.image || "",
-        author: event.author,
-        authorId: event.authorId,
+        author: event.author || "",
+        authorId: event.authorId || "",
         registrationCount: event.registrationCount || 0,
-        status: event.status,
+        status: event.status || "active",
         // Add default values for existing component compatibility
         format: "In-Person", // Default value
         price: "Free", // Default value
         department: "General", // Default value
-        tags: [event.category], // Use category as tag
+        tags: Array.isArray(event.tags)
+          ? event.tags
+          : [event.category || "General"], // Safe array
         createdAt: event.createdAt,
         updatedAt: event.updatedAt,
       }));
@@ -143,120 +175,173 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // Filtering and sorting logic
+  // Handle URL parameters for category filtering
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam) {
+      setFilters((prev) => ({
+        ...prev,
+        category: categoryParam,
+      }));
+    }
+  }, [searchParams]);
+
+  // Enhanced filtering and sorting logic with safe operations
   const filteredAndSortedEvents = useMemo(() => {
-    let filtered = events.filter((event) => {
-      // Search filter
-      if (
-        search &&
-        !event.title.toLowerCase().includes(search.toLowerCase()) &&
-        !event.description?.toLowerCase().includes(search.toLowerCase()) &&
-        !event.tags?.some((tag) =>
-          tag.toLowerCase().includes(search.toLowerCase())
-        )
-      ) {
-        return false;
-      }
+    if (!Array.isArray(events)) {
+      console.warn("Events is not an array:", events);
+      return [];
+    }
 
-      // Category filter
-      if (filters.category !== "All" && event.category !== filters.category) {
-        return false;
-      }
+    try {
+      let filtered = events.filter((event) => {
+        // Ensure event exists
+        if (!event) return false;
 
-      // Format filter
-      if (filters.format !== "All" && event.format !== filters.format) {
-        return false;
-      }
+        // Search filter with safe string operations
+        if (search && search.trim()) {
+          const searchTerm = search.trim();
+          const matchesTitle = safeStringIncludes(event.title, searchTerm);
+          const matchesDescription = safeStringIncludes(
+            event.description,
+            searchTerm
+          );
+          const matchesAuthor = safeStringIncludes(event.author, searchTerm);
+          const matchesVenue = safeStringIncludes(event.venue, searchTerm);
+          const matchesCategory = safeStringIncludes(
+            event.category,
+            searchTerm
+          );
+          const matchesTags = safeArrayIncludes(event.tags, searchTerm);
 
-      // Price filter
-      if (filters.price !== "All") {
-        if (filters.price === "Free" && event.price !== "Free") {
+          if (
+            !matchesTitle &&
+            !matchesDescription &&
+            !matchesAuthor &&
+            !matchesVenue &&
+            !matchesCategory &&
+            !matchesTags
+          ) {
+            return false;
+          }
+        }
+
+        // Category filter
+        if (filters.category !== "All" && event.category !== filters.category) {
           return false;
         }
-        if (filters.price === "Paid" && event.price === "Free") {
+
+        // Format filter
+        if (filters.format !== "All" && event.format !== filters.format) {
           return false;
         }
-      }
 
-      // Department filter
-      if (
-        filters.department !== "All" &&
-        event.department !== filters.department
-      ) {
-        return false;
-      }
+        // Price filter
+        if (filters.price !== "All") {
+          if (filters.price === "Free" && event.price !== "Free") {
+            return false;
+          }
+          if (filters.price === "Paid" && event.price === "Free") {
+            return false;
+          }
+        }
 
-      // Time slot filter
-      if (filters.timeSlot !== "All") {
-        const eventTime = event.time;
-        const hour = parseInt(eventTime.split(":")[0]);
-        const period = eventTime.split(" ")[1];
-        const hour24 =
-          period === "PM" && hour !== 12
-            ? hour + 12
-            : period === "AM" && hour === 12
-            ? 0
-            : hour;
-
+        // Department filter
         if (
-          filters.timeSlot === "Morning (6AM-12PM)" &&
-          (hour24 < 6 || hour24 >= 12)
+          filters.department !== "All" &&
+          event.department !== filters.department
         ) {
           return false;
         }
-        if (
-          filters.timeSlot === "Afternoon (12PM-6PM)" &&
-          (hour24 < 12 || hour24 >= 18)
-        ) {
-          return false;
-        }
-        if (
-          filters.timeSlot === "Evening (6PM-12AM)" &&
-          (hour24 < 18 || hour24 >= 24)
-        ) {
-          return false;
-        }
-      }
 
-      // Date range filter
-      if (filters.dateRange.start || filters.dateRange.end) {
-        const eventDate = new Date(event.date);
-        if (
-          filters.dateRange.start &&
-          eventDate < new Date(filters.dateRange.start)
-        ) {
-          return false;
-        }
-        if (
-          filters.dateRange.end &&
-          eventDate > new Date(filters.dateRange.end)
-        ) {
-          return false;
-        }
-      }
+        // Time slot filter
+        if (filters.timeSlot !== "All" && event.time) {
+          try {
+            const eventTime = String(event.time);
+            const hour = parseInt(eventTime.split(":")[0]);
+            const period = eventTime.split(" ")[1];
+            const hour24 =
+              period === "PM" && hour !== 12
+                ? hour + 12
+                : period === "AM" && hour === 12
+                ? 0
+                : hour;
 
-      return true;
-    });
+            if (
+              filters.timeSlot === "Morning (6AM-12PM)" &&
+              (hour24 < 6 || hour24 >= 12)
+            ) {
+              return false;
+            }
+            if (
+              filters.timeSlot === "Afternoon (12PM-6PM)" &&
+              (hour24 < 12 || hour24 >= 18)
+            ) {
+              return false;
+            }
+            if (
+              filters.timeSlot === "Evening (6PM-12AM)" &&
+              (hour24 < 18 || hour24 >= 24)
+            ) {
+              return false;
+            }
+          } catch (timeError) {
+            console.warn("Time parsing error:", timeError);
+          }
+        }
 
-    // Sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "date-asc":
-          return new Date(a.date) - new Date(b.date);
-        case "date-desc":
-          return new Date(b.date) - new Date(a.date);
-        case "popularity":
-          return (b.registrationCount || 0) - (a.registrationCount || 0);
-        case "alphabetical":
-          return a.title.localeCompare(b.title);
-        case "recent":
-          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-        default:
+        // Date range filter
+        if (filters.dateRange.start || filters.dateRange.end) {
+          try {
+            const eventDate = new Date(event.date);
+            if (
+              filters.dateRange.start &&
+              eventDate < new Date(filters.dateRange.start)
+            ) {
+              return false;
+            }
+            if (
+              filters.dateRange.end &&
+              eventDate > new Date(filters.dateRange.end)
+            ) {
+              return false;
+            }
+          } catch (dateError) {
+            console.warn("Date parsing error:", dateError);
+          }
+        }
+
+        return true;
+      });
+
+      // Sorting with safe operations
+      filtered.sort((a, b) => {
+        try {
+          switch (sortBy) {
+            case "date-asc":
+              return new Date(a.date || 0) - new Date(b.date || 0);
+            case "date-desc":
+              return new Date(b.date || 0) - new Date(a.date || 0);
+            case "popularity":
+              return (b.registrationCount || 0) - (a.registrationCount || 0);
+            case "alphabetical":
+              return (a.title || "").localeCompare(b.title || "");
+            case "recent":
+              return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+            default:
+              return 0;
+          }
+        } catch (sortError) {
+          console.warn("Sorting error:", sortError);
           return 0;
-      }
-    });
+        }
+      });
 
-    return filtered;
+      return filtered;
+    } catch (filterError) {
+      console.error("Filtering error:", filterError);
+      return events; // Return original events as fallback
+    }
   }, [events, search, filters, sortBy]);
 
   // Event handlers
@@ -407,10 +492,7 @@ const Events = () => {
               ) : filteredAndSortedEvents.length > 0 ? (
                 // ✅ Simple CSS Grid - No react-window
                 filteredAndSortedEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                  />
+                  <EventCard key={event.id} event={event} />
                 ))
               ) : (
                 <div className={styles.noResults}>
