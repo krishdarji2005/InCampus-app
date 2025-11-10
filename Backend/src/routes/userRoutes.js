@@ -292,4 +292,129 @@ router.get("/:id/events", async (req, res) => {
   }
 });
 
+// Add this new route to your existing userRoutes.js
+router.post("/profile/:userId/complete-onboarding", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { department, year, phone, rollNumber, bio, interests, socialLinks } =
+      req.body;
+
+    console.log("Completing onboarding for user:", userId);
+    console.log("Received data:", req.body);
+
+    // Validate required fields
+    if (!department || !year || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+        errors: [
+          !department && "Department is required",
+          !year && "Year is required",
+          !phone && "Phone number is required",
+        ].filter(Boolean),
+      });
+    }
+
+    // Validate phone number
+    const phoneRegex = /^[+]?[\d\s\-\(\)]{10,}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid phone number format",
+      });
+    }
+
+    // Find and update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          department,
+          year,
+          phone,
+          rollNumber: rollNumber || "",
+          bio: bio || "",
+          interests: interests || [],
+          socialLinks: {
+            linkedin: socialLinks?.linkedin || "",
+            github: socialLinks?.github || "",
+            instagram: socialLinks?.instagram || "",
+            portfolio: socialLinks?.portfolio || "",
+          },
+          profileCompleted: true,
+          onboardingCompleted: true,
+          updatedAt: new Date(),
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    console.log("User updated successfully:", updatedUser._id);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile completed successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        department: updatedUser.department,
+        year: updatedUser.year,
+        phone: updatedUser.phone,
+        rollNumber: updatedUser.rollNumber,
+        bio: updatedUser.bio,
+        interests: updatedUser.interests,
+        socialLinks: updatedUser.socialLinks,
+        profileCompleted: updatedUser.profileCompleted,
+        onboardingCompleted: updatedUser.onboardingCompleted,
+      },
+    });
+  } catch (error) {
+    console.error("Onboarding completion error:", error);
+
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationErrors,
+      });
+    }
+
+    if (error.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID format",
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
+// Add a test route to verify the routes are working
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "User routes are working!",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 module.exports = router;

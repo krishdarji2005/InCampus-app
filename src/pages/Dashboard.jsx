@@ -210,13 +210,13 @@ const Dashboard = () => {
                 <FaPlus />
                 New Event
               </button>
-              <button className={styles.iconButton} title="Notifications">
+              {/* <button className={styles.iconButton} title="Notifications">
                 <FaBell />
                 <span className={styles.notificationDot}></span>
               </button>
               <button className={styles.iconButton} title="Settings">
                 <FaCog />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -350,15 +350,15 @@ const Dashboard = () => {
             </div>
             <div className={styles.chart}>
               <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 40, bottom: 20, left: 90 }}>
                   <Pie
                     data={analytics?.categoryStats || []}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     label={({ _id, percent }) => `${_id} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={90}
-                    innerRadius={50}
+                    outerRadius={70}
+                    innerRadius={40}
                     fill="#8884d8"
                     dataKey="count"
                   >

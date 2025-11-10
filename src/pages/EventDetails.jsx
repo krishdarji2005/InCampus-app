@@ -438,12 +438,36 @@ const EventDetails = () => {
               <div className={styles.locationContent}>
                 <div className={styles.venueInfo}>
                   <h3>{event.venue}</h3>
-                  <p>University Campus, Main Building</p>
+                  <p>Somaiya Ayurvihar Complex, Eastern Express Highway</p>
+                  <p>Sion East, Mumbai, Maharashtra 400022</p>
                 </div>
-                <div className={styles.mapPlaceholder}>
-                  <div className={styles.mapContent}>
-                    <span>🗺️</span>
-                    <span>View on Google Maps</span>
+                <div className={styles.mapContainer}>
+                  <iframe
+                    width="100%"
+                    height="400"
+                    frameBorder="0"
+                    scrolling="no"
+                    marginHeight="0"
+                    marginWidth="0"
+                    src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=Somaiya%20Ayurvihar%20Complex,%20Eastern%20Express%20Highway,%20near%20Everard%20Nagar,%20Sion%20East,%20Sion,%20Mumbai,%20Maharashtra%20400022+(Somaiya%20University)&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=B&amp;output=embed"
+                    title="Event Location Map"
+                    loading="lazy"
+                    allowFullScreen
+                  >
+                    <a href="https://www.google.com/maps/place/Somaiya+Ayurvihar+Complex,+Eastern+Express+Highway,+near+Everard+Nagar,+Sion+East,+Sion,+Mumbai,+Maharashtra+400022">
+                      View larger map
+                    </a>
+                  </iframe>
+                  <div className={styles.mapOverlay}>
+                    <a
+                      href="https://www.google.com/maps/place/Somaiya+Ayurvihar+Complex,+Eastern+Express+Highway,+near+Everard+Nagar,+Sion+East,+Sion,+Mumbai,+Maharashtra+400022"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.mapLink}
+                    >
+                      <span>📍</span>
+                      Open in Google Maps
+                    </a>
                   </div>
                 </div>
               </div>

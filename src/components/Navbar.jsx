@@ -145,6 +145,12 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleAboutClick = () => {
+    navigate("/aboutus");
+    setShowDropdown(false);
+    setIsMobileMenuOpen(false);
+  };
+
   // Enhanced mobile menu toggle with better state management
   const handleMobileMenuToggle = () => {
     setIsMobileMenuOpen((prev) => !prev);
@@ -201,6 +207,16 @@ const Navbar = () => {
                   }
                 >
                   Events <MdArrowOutward />
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/aboutus"
+                  className={({ isActive }) =>
+                    isActive ? styles.activeLink : ""
+                  }
+                >
+                  About Us
                 </NavLink>
               </li>
               {isAuthenticated && (
@@ -302,17 +318,17 @@ const Navbar = () => {
 
                             <div
                               className={styles.dropdownItem}
-                              onClick={handleDashboardClick}
+                              onClick={handleAboutClick}
                             >
                               <div className={styles.dropdownItemIcon}>
-                                <MdDashboard />
+                                <MdArrowOutward />
                               </div>
                               <div className={styles.dropdownItemContent}>
                                 <span className={styles.dropdownItemTitle}>
-                                  Dashboard
+                                  About Us
                                 </span>
                                 <span className={styles.dropdownItemSubtitle}>
-                                  Manage your events
+                                  Meet our team
                                 </span>
                               </div>
                             </div>
@@ -458,25 +474,25 @@ const Navbar = () => {
                     </NavLink>
                   </li>
 
+                  <li>
+                    <NavLink
+                      to="/aboutus"
+                      onClick={handleMobileNavClick}
+                      className={({ isActive }) =>
+                        `${styles.mobileNavLink} ${
+                          isActive ? styles.activeMobileLink : ""
+                        }`
+                      }
+                    >
+                      <div className={styles.mobileNavLinkIcon}>
+                        <MdArrowOutward />
+                      </div>
+                      <span>About Us</span>
+                    </NavLink>
+                  </li>
+
                   {isAuthenticated && (
                     <>
-                      <li>
-                        <NavLink
-                          to="/dashboard"
-                          onClick={handleMobileNavClick}
-                          className={({ isActive }) =>
-                            `${styles.mobileNavLink} ${
-                              isActive ? styles.activeMobileLink : ""
-                            }`
-                          }
-                        >
-                          <div className={styles.mobileNavLinkIcon}>
-                            <MdDashboard />
-                          </div>
-                          <span>Dashboard</span>
-                        </NavLink>
-                      </li>
-
                       <li>
                         <button
                           className={styles.mobileNavLink}

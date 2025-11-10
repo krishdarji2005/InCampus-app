@@ -200,7 +200,10 @@
   grid-template-columns: 2fr 1fr;
   gap: 1.5rem;
   margin-bottom: 3rem;
+
+
 }
+
 
 .chartContainer {
   background: rgba(255, 255, 255, 0.03);
@@ -230,6 +233,7 @@
   color: #ffffff;
 }
 
+
 .chartSubtitle {
   font-size: 0.875rem;
   color: #94a3b8;
@@ -252,7 +256,19 @@
   border-color: #3b82f6;
   background: rgba(255, 255, 255, 0.08);
 }
+.filterSelect option {
+  background-color: #1e1e2f;  /* dark dropdown panel */
+  color: #e2e8f0;             /* readable text */
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
 
+/* Optional hover/focus effect inside dropdown */
+.filterSelect option:checked,
+.filterSelect option:hover {
+  background-color: #2d2d40;
+  color: #ffffff;
+}
 /* Enhanced Events Section */
 .eventsSection,
 .activitySection {

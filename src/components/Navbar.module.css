@@ -112,24 +112,26 @@
 
 /* ===== SIGN IN BUTTON ===== */
 .signIn {
-  padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(139, 92, 246, 0.8));
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 12px;
-  color: white;
+  padding: 0.6rem 1.4rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(138, 92, 246, 0.3);
+  border-radius: 14px;
+  color: #dcdcff;
   font-weight: 500;
   font-size: 0.9rem;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0 0 rgba(138, 92, 246, 0.4);
 }
 
 .signIn:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 1), rgba(139, 92, 246, 1));
+  background: linear-gradient(135deg, #6365f1a9, #8a5cf6af);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-  border-color: rgba(99, 102, 241, 0.6);
+  color: white;
 }
 
 /* ===== PROFILE DROPDOWN STYLES ===== */

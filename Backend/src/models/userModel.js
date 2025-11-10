@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     // Basic Auth Info
+    auth0Id: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     name: {
       type: String,
       required: true,
@@ -59,6 +64,7 @@ const userSchema = new mongoose.Schema(
         "Computer Science & Engineering (AI & ML)",
         "Other",
       ],
+      default: "",
     },
     year: {
       type: String,
@@ -70,6 +76,7 @@ const userSchema = new mongoose.Schema(
         "Postgraduate",
         "Faculty",
       ],
+      default: "",
     },
     rollNumber: {
       type: String,
@@ -81,6 +88,7 @@ const userSchema = new mongoose.Schema(
         },
         message: "Invalid roll number format",
       },
+      default: "",
     },
 
     // Interests and Preferences
@@ -115,6 +123,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    onboardingCompleted: {
+      type: Boolean,
+      default: false,
+    },
 
     // Social Links
     socialLinks: {
@@ -143,8 +155,19 @@ const userSchema = new mongoose.Schema(
     // Event Related
     registeredEvents: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Event",
+        eventId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Event",
+        },
+        registeredAt: {
+          type: Date,
+          default: Date.now,
+        },
+        status: {
+          type: String,
+          enum: ["pending", "confirmed", "cancelled"],
+          default: "pending",
+        },
       },
     ],
     createdEvents: [

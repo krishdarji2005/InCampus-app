@@ -15,6 +15,7 @@ import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import OnboardingFlow from "./components/OnboardingFlow/OnboardingFlow";
 import Dashboard from "./pages/Dashboard";
 import EditEvent from "./pages/EditEvent";
+import AboutUs from "./pages/AboutUs";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -93,6 +94,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/aboutus",
+        element: (
+          <ProtectedRoute>
+            <AboutUs />
           </ProtectedRoute>
         ),
       },
