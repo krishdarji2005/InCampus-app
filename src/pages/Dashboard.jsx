@@ -33,6 +33,8 @@ import {
 } from 'recharts';
 import styles from './Dashboard.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [analytics, setAnalytics] = useState(null);
@@ -58,7 +60,7 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/dashboard/analytics/${organizerId}`);
+      const response = await fetch(`${API_BASE_URL}/dashboard/analytics/${organizerId}`);
       const data = await response.json();
       
       if (data.success) {
@@ -84,7 +86,7 @@ const Dashboard = () => {
         limit: '20'
       });
 
-      const response = await fetch(`http://localhost:5000/api/dashboard/organizer/${organizerId}/events?${params}`);
+      const response = await fetch(`${API_BASE_URL}/dashboard/organizer/${organizerId}/events?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -113,7 +115,7 @@ const Dashboard = () => {
     try {
       toast.info('Preparing download...');
       
-      const response = await fetch(`http://localhost:5000/api/dashboard/events/${eventId}/export`);
+      const response = await fetch(`${API_BASE_URL}/dashboard/events/${eventId}/export`);
       
       if (response.ok) {
         const blob = await response.blob();
@@ -141,7 +143,7 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/dashboard/events/${eventId}`, {
+      const response = await fetch(`${API_BASE_URL}/dashboard/events/${eventId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

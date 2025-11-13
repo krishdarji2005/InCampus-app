@@ -9,6 +9,8 @@ import {
 } from 'react-icons/fa';
 import styles from './QuickStatistics.module.css';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Throttle function for better performance
 function throttle(func, delay) {
   let lastCall = 0;
@@ -105,7 +107,7 @@ const QuickStatistics = () => {
     // Fetch real stats from your backend
     const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/stats');
+        const response = await fetch(`${API_BASE_URL}/stats`);
         const data = await response.json();
         
         if (data.success) {

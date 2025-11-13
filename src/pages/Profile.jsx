@@ -30,6 +30,8 @@ import {
 } from "react-icons/fa";
 import EditProfile from "../components/EditProfile/EditProfile";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Profile = () => {
   const {
     user: auth0User,
@@ -51,7 +53,7 @@ const Profile = () => {
   // Existing functions remain the same...
   const checkServerStatus = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/health", {
+      const response = await fetch(`${API_BASE_URL}/health`, {
         method: "GET",
         headers: {
           Accept: "application/json",
@@ -91,7 +93,7 @@ const Profile = () => {
       console.log("Looking for user with email:", authUser.email);
 
       const findResponse = await fetch(
-        `http://localhost:5000/api/users/profile?email=${encodeURIComponent(
+        `${API_BASE_URL}/users/profile?email=${encodeURIComponent(
           authUser.email
         )}`,
         {
@@ -145,7 +147,7 @@ const Profile = () => {
       };
 
       const createResponse = await fetch(
-        "http://localhost:5000/api/users/google-auth",
+        `${API_BASE_URL}/users/google-auth`,
         {
           method: "POST",
           headers: {
@@ -194,7 +196,7 @@ const Profile = () => {
       console.log("Fetching registered events for user:", userId);
 
       const response = await fetch(
-        `http://localhost:5000/api/users/${userId}/events`,
+        `${API_BASE_URL}/users/${userId}/events`,
         {
           method: "GET",
           headers: {
@@ -227,7 +229,7 @@ const Profile = () => {
       console.log("Fetching hosted events for user:", userId);
 
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/organizer/${userId}/events?limit=50`,
+        `${API_BASE_URL}/dashboard/organizer/${userId}/events?limit=50`,
         {
           method: "GET",
           headers: {
@@ -348,7 +350,7 @@ const Profile = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/events/${eventId}/register`,
+        `${API_BASE_URL}/events/${eventId}/register`,
         {
           method: "DELETE",
           headers: {
@@ -378,7 +380,7 @@ const Profile = () => {
       toast.info("Preparing download...");
 
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/events/${eventId}/export`
+        `${API_BASE_URL}/dashboard/events/${eventId}/export`
       );
 
       if (response.ok) {
@@ -416,7 +418,7 @@ const Profile = () => {
     try {
       const organizerId = localStorage.getItem("userId");
       const response = await fetch(
-        `http://localhost:5000/api/dashboard/events/${eventId}`,
+        `${API_BASE_URL}/dashboard/events/${eventId}`,
         {
           method: "DELETE",
           headers: {
@@ -496,7 +498,7 @@ const Profile = () => {
   const updateOnboardingStatus = async (userId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/profile/${userId}`,
+        `${API_BASE_URL}/users/profile/${userId}`,
         {
           method: "PUT",
           headers: {

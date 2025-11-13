@@ -13,6 +13,8 @@ import {
 } from "react-icons/md";
 import styles from "./CreateEvent.module.css"; // Reuse the same styles
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const EditEvent = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -50,7 +52,7 @@ const EditEvent = () => {
     const fetchEvent = async () => {
       try {
         setIsLoadingEvent(true);
-        const response = await fetch(`http://localhost:5000/api/events/${id}`);
+        const response = await fetch(`${API_BASE_URL}/events/${id}`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch event");
@@ -219,7 +221,7 @@ const EditEvent = () => {
       console.log("Sending update data:", updateData);
 
       // Make API call to update event
-      const response = await fetch(`http://localhost:5000/api/events/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/events/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

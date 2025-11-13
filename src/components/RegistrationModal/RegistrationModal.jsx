@@ -24,6 +24,8 @@ import {
   FaShieldAlt,
 } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
   useEffect(() => {
     console.log("RegistrationModal received event prop:", event);
@@ -122,7 +124,7 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
   const saveUserProfile = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/users/${user._id}`,
+        `${API_BASE_URL}/users/${user._id}`,
         {
           method: "PUT",
           headers: {
@@ -288,7 +290,7 @@ const RegistrationModal = ({ isOpen, onClose, event, user, onSubmit }) => {
       console.log("PDF File:", pdfFile?.name);
 
       const response = await fetch(
-        `http://localhost:5000/api/events/${eventId}/register`, // Make sure this matches your route
+        `${API_BASE_URL}/events/${eventId}/register`, // Make sure this matches your route
         {
           method: "POST",
           body: formData,

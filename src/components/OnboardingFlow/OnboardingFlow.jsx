@@ -17,6 +17,8 @@ import {
   FaIdCard
 } from 'react-icons/fa';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const OnboardingFlow = ({ userId: propUserId, currentUser, onComplete }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -201,7 +203,7 @@ const OnboardingFlow = ({ userId: propUserId, currentUser, onComplete }) => {
         formData
       });
 
-      const response = await fetch(`http://localhost:5000/api/users/profile/${userId}/complete-onboarding`, {
+      const response = await fetch(`${API_BASE_URL}/users/profile/${userId}/complete-onboarding`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

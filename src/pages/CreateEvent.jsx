@@ -13,6 +13,8 @@ import {
 } from "react-icons/md";
 import styles from "./CreateEvent.module.css";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const CreateEvent = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -168,7 +170,7 @@ const CreateEvent = () => {
       );
 
       // Make API call with FormData (not JSON)
-      const response = await fetch("http://localhost:5000/api/events", {
+      const response = await fetch(`${API_BASE_URL}/events`, {
         method: "POST",
         body: submitData, // Send FormData, not JSON
         // Don't set Content-Type header - let browser set it with boundary

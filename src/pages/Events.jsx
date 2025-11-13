@@ -17,6 +17,8 @@ import { RiFeedbackLine } from "react-icons/ri";
 import { ImCalendar } from "react-icons/im";
 import { BsFillGrid3X3GapFill } from "react-icons/bs";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const Events = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -84,7 +86,7 @@ const Events = () => {
       setLoading(true);
       console.log("Fetching events from backend...");
 
-      const response = await fetch("http://localhost:5000/api/events");
+      const response = await fetch(`${API_BASE_URL}/events`);
 
       if (!response.ok) {
         throw new Error("Failed to fetch events");
@@ -147,7 +149,7 @@ const Events = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/events/${eventId}/register`,
+        `${API_BASE_URL}/events/${eventId}/register`,
         {
           method: "POST",
           headers: {

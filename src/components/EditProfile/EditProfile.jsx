@@ -13,6 +13,8 @@ import {
   FaSave,
 } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const EditProfile = ({ user, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -176,7 +178,7 @@ const EditProfile = ({ user, onClose, onSave }) => {
       console.log("Updating profile with data:", cleanedData);
 
       const response = await fetch(
-        `http://localhost:5000/api/users/profile/${userId}`,
+        `${API_BASE_URL}/users/profile/${userId}`,
         {
           method: "PUT",
           headers: {

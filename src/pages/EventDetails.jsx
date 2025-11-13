@@ -17,6 +17,8 @@ import RegistrationModal from "../components/RegistrationModal/RegistrationModal
 import EventDetailsSkeleton from "../components/LoadingSkeleton/EventDetailsSkeleton";
 import { toast } from "react-toastify";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const EventDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ const EventDetails = () => {
         console.log("Fetching user data for userId:", userId);
 
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `${API_BASE_URL}/users/${userId}`
         );
         const data = await response.json();
 
@@ -102,7 +104,7 @@ const EventDetails = () => {
         try {
           setIsLoading(true);
           const response = await fetch(
-            `http://localhost:5000/api/events/${id}`
+            `${API_BASE_URL}/events/${id}`
           );
 
           if (response.ok) {
