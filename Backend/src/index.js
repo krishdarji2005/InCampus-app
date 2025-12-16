@@ -1,111 +1,149 @@
-// Backend/src/index.js
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const path = require("path");
-require("dotenv").config();
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const connectDB = require('./config/db');
+
+// Import routes
+const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Environment check
+console.log('🔧 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔌 MongoDB URI:', process.env.MONGODB_URI ? 'Set' : 'Not Set');
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? [
+          'https://incampus-app.vercel.app',
+          'https://incampus-gnpr.onrender.com',
+          'https://your-frontend-domain.com',
+          // Add your actual frontend domains here
+        ]
+      : [
+          'http://localhost:5173',
+          'http://localhost:3000',
+          'http://127.0.0.1:5173'
+        ];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('🚫 CORS blocked origin:', origin);
+      callback(null, true); // Allow for now, remove in production
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+    'Cache-Control'
+  ],
+};
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// FIXED: Correct static file serving paths
-// Serve uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
-// Serve entire public directory
-app.use(express.static(path.join(__dirname, "../public")));
-
-// Debug middleware to log file requests
-app.use("/uploads", (req, res, next) => {
-  console.log("🖼️ Image request:", req.url);
-  console.log(
-    "📁 Full path:",
-    path.join(__dirname, "../public/uploads", req.url)
-  );
+// Request logging for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  if (req.method === 'POST' && req.body) {
+    console.log('Body keys:', Object.keys(req.body));
+  }
   next();
 });
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/incampus");
+connectDB();
 
-mongoose.connection.on("connected", () => {
-  console.log("Connected to MongoDB");
-});
+// Create uploads directory if it doesn't exist
+const uploadsPath = path.join(__dirname, '..', 'public', 'uploads');
+console.log('📁 Uploads directory:', uploadsPath);
 
-mongoose.connection.on("error", (err) => {
-  console.error("MongoDB connection error:", err);
-});
+// Routes
+app.use('/api/events', eventRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
-// Import routes
-const eventRoutes = require("./routes/eventRoutes");
-const userRoutes = require("./routes/userRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
+// Static files
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 
-// Use routes
-app.use("/api/events", eventRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-
-// Health check endpoint with debug info
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "Server is running",
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'InCampus Backend Server is running',
     timestamp: new Date().toISOString(),
-    port: PORT,
-    uploadsPath: path.join(__dirname, "../public/uploads"),
-    staticPaths: {
-      uploads: "/uploads",
-      public: path.join(__dirname, "../public"),
-    },
+    environment: process.env.NODE_ENV,
+    port: process.env.PORT,
+    mongodb: process.env.MONGODB_URI ? 'Connected' : 'Not configured'
   });
 });
 
-// Default route
-app.get("/", (req, res) => {
+// Root endpoint
+app.get('/', (req, res) => {
   res.json({
-    message: "InCampus Backend API",
-    version: "1.0.0",
+    message: 'InCampus Backend API',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV,
     endpoints: {
-      events: "/api/events",
-      users: "/api/users",
-      dashboard: "/api/dashboard",
-      health: "/api/health",
-    },
+      health: '/api/health',
+      events: '/api/events',
+      users: '/api/users',
+      profiles: '/api/profile',
+      dashboard: '/api/dashboard'
+    }
+  });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+  console.warn('📍 Route not found:', req.originalUrl);
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+    path: req.originalUrl
   });
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
+app.use((error, req, res, next) => {
+  console.error('❌ Error:', error.message);
+  console.error('Stack:', error.stack);
+  res.status(error.status || 500).json({
     success: false,
-    message: "Something went wrong!",
-    error:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "Internal server error",
+    message: error.message || 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });
 });
 
-// Handle 404 routes
-app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📅 Events API: http://localhost:${PORT}/api/events`);
-  console.log(`👤 Users API: http://localhost:${PORT}/api/users`);
-  console.log(`📈 Dashboard API: http://localhost:${PORT}/api/dashboard`);
-  console.log(`📁 Uploads served at: http://localhost:${PORT}/uploads/`);
-  console.log(`📂 Static path: ${path.join(__dirname, "../public")}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('🚀 InCampus Backend Server started!');
+  console.log(`📍 Port: ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📊 Health check: /api/health`);
+  console.log(`📅 Events API: /api/events`);
+  console.log(`👤 Users API: /api/users`);
+  console.log(`📈 Dashboard API: /api/dashboard`);
+  console.log(`📁 Static files: /uploads`);
 });
 
 module.exports = app;

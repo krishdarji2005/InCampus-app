@@ -2,6 +2,77 @@ const Event = require("../models/eventModel");
 const User = require("../models/userModel");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
+
+// Ensure upload directories exist
+const ensureDirectoryExists = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log("📁 Created directory:", dirPath);
+  }
+};
+
+// Storage configuration
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    let uploadPath;
+
+    if (file.fieldname === "image") {
+      uploadPath = path.join(__dirname, "../../public/uploads/events/images");
+    } else if (file.fieldname === "document") {
+      uploadPath = path.join(
+        __dirname,
+        "../../public/uploads/events/documents"
+      );
+    } else if (file.fieldname === "idImage") {
+      uploadPath = path.join(
+        __dirname,
+        "../../public/uploads/events/id-images"
+      );
+    } else {
+      uploadPath = path.join(__dirname, "../../public/uploads/events");
+    }
+
+    ensureDirectoryExists(uploadPath);
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const filename = `${file.fieldname}-${uniqueSuffix}${path.extname(
+      file.originalname
+    )}`;
+    cb(null, filename);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === "image") {
+      if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only image files are allowed for event images"));
+      }
+    } else if (file.fieldname === "document") {
+      const allowedMimes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
+      if (allowedMimes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only PDF and Word documents are allowed"));
+      }
+    } else {
+      cb(null, true);
+    }
+  },
+});
 
 // Helper function to delete uploaded files
 const deleteUploadedFiles = (files) => {
@@ -24,80 +95,99 @@ const deleteUploadedFiles = (files) => {
 // Create new event with proper image handling
 const createEvent = async (req, res) => {
   try {
-    const eventData = req.body;
-    const uploadedFile = req.file;
+    console.log("📝 Creating new event...");
+    console.log("Body:", req.body);
+    console.log("File:", req.file);
 
-    console.log("=== CREATE EVENT DEBUG ===");
-    console.log("Event data:", eventData);
-    console.log("Uploaded file:", uploadedFile);
-    console.log("========================");
+    const {
+      title,
+      description,
+      date,
+      time,
+      venue,
+      category,
+      type,
+      maxParticipants,
+      author,
+      createdBy,
+    } = req.body;
 
-    const { createdBy } = eventData;
-
-    if (!createdBy) {
-      if (uploadedFile && fs.existsSync(uploadedFile.path)) {
-        fs.unlinkSync(uploadedFile.path);
-      }
+    // Validation
+    if (!title || !description || !date || !venue) {
       return res.status(400).json({
         success: false,
-        message: "Creator ID is required",
+        message: "Missing required fields",
+        required: ["title", "description", "date", "venue"],
       });
     }
 
-    const newEventData = {
-      ...eventData,
-      createdBy: createdBy,
-      category: eventData.category || eventData.type,
-      type: eventData.type || eventData.category,
+    // Create event object
+    const eventData = {
+      title: title.trim(),
+      description: description.trim(),
+      date: new Date(date),
+      time: time || "10:00 AM",
+      venue: venue.trim(),
+      category: category || "General",
+      type: type || "Workshop",
+      maxParticipants: parseInt(maxParticipants) || 100,
+      author: author || "Event Organizer",
+      createdBy: createdBy || null,
+      registrationCount: 0,
+      registeredUsers: [],
+      status: "active",
     };
 
-    if (uploadedFile) {
-      const imageUrl = `/uploads/events/images/${uploadedFile.filename}`;
-      newEventData.image = imageUrl;
-      newEventData.imageUrl = imageUrl;
-      console.log("✅ Image uploaded successfully:");
-      console.log("📁 File path:", uploadedFile.path);
-      console.log("🔗 URL path:", imageUrl);
-      console.log("🌐 Full URL:", `http://localhost:5000${imageUrl}`);
-    } else {
-      const defaultImage =
-        "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
-      newEventData.image = defaultImage;
-      newEventData.imageUrl = defaultImage;
-      console.log("📷 No image uploaded, using default");
+    // Handle image upload
+    if (req.file) {
+      const baseUrl =
+        process.env.NODE_ENV === "production"
+          ? `https://${req.get("host")}`
+          : `http://localhost:${process.env.PORT || 5000}`;
+
+      eventData.image = `${baseUrl}/uploads/events/images/${req.file.filename}`;
+      console.log("🖼️ Image uploaded:", eventData.image);
     }
 
-    const event = new Event(newEventData);
-    await event.save();
+    // Create and save event
+    const event = new Event(eventData);
+    const savedEvent = await event.save();
 
-    console.log("🎉 Event created successfully:", event.title);
-    console.log("🖼️ Final image URL:", event.image);
+    console.log("✅ Event created successfully:", savedEvent._id);
 
     res.status(201).json({
       success: true,
       message: "Event created successfully",
-      event: event,
+      event: savedEvent,
     });
   } catch (error) {
-    console.error("❌ Create event error:", error);
+    console.error("❌ Event creation error:", error);
 
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    // Clean up uploaded file if event creation fails
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Failed to clean up file:", err);
+      });
     }
 
     if (error.name === "ValidationError") {
-      const errors = Object.values(error.errors).map((err) => err.message);
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
       return res.status(400).json({
         success: false,
         message: "Validation failed",
-        errors: errors,
+        errors: validationErrors,
       });
     }
 
     res.status(500).json({
       success: false,
       message: "Failed to create event",
-      error: error.message,
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Internal server error",
     });
   }
 };
@@ -105,50 +195,61 @@ const createEvent = async (req, res) => {
 // Get all events with proper image URL handling
 const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find()
-      .populate("createdBy", "name email")
-      .populate("registeredUsers.userId", "name email department year")
-      .sort({ createdAt: -1 });
+    console.log("📋 Fetching all events...");
 
-    const eventsWithCount = events.map((event) => {
-      const eventObj = event.toObject();
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      search,
+      status = "active",
+    } = req.query;
 
-      let imageUrl = eventObj.image || eventObj.imageUrl;
+    // Build filter object
+    const filter = { status };
 
-      if (imageUrl) {
-        if (imageUrl.startsWith("/uploads/")) {
-          imageUrl = `http://localhost:5000${imageUrl}`;
-        } else if (!imageUrl.startsWith("http")) {
-          imageUrl = `http://localhost:5000/uploads/events/images/${imageUrl}`;
-        }
-      } else {
-        imageUrl =
-          "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80";
-      }
+    if (category && category !== "all") {
+      filter.category = category;
+    }
 
-      console.log(`📸 Event "${eventObj.title}" image: ${imageUrl}`);
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { venue: { $regex: search, $options: "i" } },
+      ];
+    }
 
-      return {
-        ...eventObj,
-        image: imageUrl,
-        registrationCount: event.registrationCount,
-        isFull: event.isFull,
-        author: eventObj.createdBy?.name || "Unknown Organizer",
-        price: "Free",
-        format: "In-Person",
-      };
-    });
+    const events = await Event.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .populate("registeredUsers.userId", "name email");
+
+    const totalEvents = await Event.countDocuments(filter);
+
+    console.log(`📊 Found ${events.length} events`);
 
     res.status(200).json({
       success: true,
-      events: eventsWithCount,
+      events,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalEvents / limit),
+        totalEvents,
+        hasNextPage: page * limit < totalEvents,
+        hasPrevPage: page > 1,
+      },
     });
   } catch (error) {
-    console.error("❌ Get all events error:", error);
+    console.error("❌ Error fetching events:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch events",
-      error: error.message,
+      error:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Internal server error",
     });
   }
 };
@@ -414,6 +515,7 @@ const cancelRegistration = async (req, res) => {
 };
 
 module.exports = {
+  upload,
   createEvent,
   getAllEvents,
   getEventById,
